@@ -195,7 +195,7 @@ const OnboardingProcess = () => {
                       type="checkbox"
                       checked={selectedServices.includes(service)}
                       onChange={() => handleServiceToggle(service)}
-                      className={`mr-3 h-4 w-4 text-[#3900DC] focus:ring-[#3900DC] border-[#E5E5E9] rounded ${
+                      className={`mr-3 h-4 w-4 text-[#3900DC] focus:ring-[#3900DC] border-[#E5E5E9] bg-white rounded ${
                         selectedServices.length >= 2 && !selectedServices.includes(service)
                           ? "opacity-50 cursor-not-allowed"
                           : ""
