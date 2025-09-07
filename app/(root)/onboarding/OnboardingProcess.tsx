@@ -419,7 +419,6 @@ const OnboardingProcess = () => {
                   <input
                     type="file"
                     accept="image/*,video/*"
-                    onChange={(e) => setUploadedMedia(e.target.files?.[0] || null)}
                     className="hidden"
                     id="mediaUpload"
                   />
