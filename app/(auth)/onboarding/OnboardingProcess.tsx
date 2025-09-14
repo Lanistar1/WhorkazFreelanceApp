@@ -145,10 +145,31 @@ const OnboardingProcess = () => {
   const progress = ((step / 3) * 100).toFixed(2) + "%"; // Assuming 3 steps total
 
   return (
-    <div className="flex mx-20 min-h-screen p-8 bg-[#FFFDFA]">
-      <div className="flex flex-row gap-6 w-full p-8 rounded-2xl">
+    <div className="flex mx-5 md:mx-20 max-w-[450px] lg:max-w-full min-h-screen md:p-8 bg-[#FFFDFA]">
+      <div className="flex flex-row gap-6 w-full md:p-8 rounded-2xl">
         {/* Logo, Back Arrow, and Progress Bar */}
-        <div className="flex flex-col items-start mb-10">
+        {/* <div className="flex flex-col items-start mb-10">
+          <Link href="/">
+            <Image
+              src="/assets/icons/AppLogo.png"
+              alt="Whorkaz Logo"
+              width={150}
+              height={14}
+              className="object-contain"
+            />
+          </Link>
+          <button onClick={handleBack} className="-ml-6 -mt-4">
+            <Image
+              src="/assets/icons/back-arrow.png"
+              alt="Back Arrow"
+              width={100}
+              height={100}
+              className="object-contain"
+            />
+          </button>
+        </div> */}
+        {/* Logo, Back Arrow, and Progress Bar on big screen*/}
+        <div className="hidden md:flex flex-col items-start mb-10">
           <Link href="/">
             <Image
               src="/assets/icons/AppLogo.png"
@@ -170,7 +191,31 @@ const OnboardingProcess = () => {
         </div>
 
         <div className="mt-20 w-full">
-          <div className="flex-1 h-2 bg-[#F1F1F5] rounded-full overflow-hidden">
+          <div className="flex flex-row items-center gap-3 -ml-8 -mt-10 sm:hidden">
+            {/* Back Button */}
+            <button onClick={handleBack} className="flex-shrink-0">
+              <Image
+                src="/assets/icons/back-arrow.png"
+                alt="Back Arrow"
+                width={100}
+                height={100}
+                className="object-contain"
+              />
+            </button>
+
+            {/* Progress Bar */}
+            <div className="flex-1 h-2 bg-[#F1F1F5] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-[#3900DC] transition-all duration-500 ease-in-out"
+                style={{ width: progress }}
+              ></div>
+            </div>
+          </div>
+
+
+          {/* progress bar on big screen */}
+          <div className="hidden sm:flex flex-1 h-2 bg-[#F1F1F5] rounded-full overflow-hidden">
+            
             <div
               className="h-full bg-[#3900DC] transition-all duration-500 ease-in-out"
               style={{ width: progress }}
@@ -188,7 +233,7 @@ const OnboardingProcess = () => {
               </p>
 
               {/* Services Checkboxes */}
-              <div className="flex flex-col gap-4 mr-150">
+              <div className="flex flex-col gap-4 md:mr-150">
                 {services.map((service) => (
                   <label key={service} className="flex items-center cursor-pointer">
                     <input
@@ -229,7 +274,7 @@ const OnboardingProcess = () => {
                 Showcase your skills.
               </p>
 
-              <div className="mr-80">
+              <div className="md:mr-80">
                  {/* Years of Experience */}
               <div className="mb-6">
                 <label className="text-[16px] text-[#4B4B56] mb-2 block">Years of experience</label>
@@ -367,7 +412,7 @@ const OnboardingProcess = () => {
                 Upload work to increase trust and visibility.
               </p>
 
-              <div className="mr-80">
+              <div className="md:mr-80">
                 {/* Project Title */}
               <div className="mb-6">
                 <label className="text-[16px] text-[#4B4B56] mb-2 block">Project title</label>
@@ -436,14 +481,17 @@ const OnboardingProcess = () => {
               <div className="flex flex-row justify-between gap-4 mt-10">
                 <button
                   onClick={handleSkipForNow}
-                  className="px-6 py-3 border border-[#E5E5E9] rounded-full text-[#4B4B56] hover:bg-[#F9F9FB] transition-colors"
+                  className="text-[14px] px-6 py-3 border border-[#E5E5E9] rounded-full text-[#4B4B56] hover:bg-[#F9F9FB] transition-colors"
                 >
                   Skip for now
                 </button>
-                <CustomButton
+                <button onClick={handleUploadProject} className="bg-[#3900DC] cursor-pointer text-white font-semibold rounded-[32px] w-[200px] md:w-[200px] h-[54px] px-5 flex items-center justify-center hover:opacity-90 transition ">
+                  Upload project
+                </button>
+                {/* <CustomButton
                   title="Upload project"
                   onClick={handleUploadProject}
-                />
+                /> */}
               </div>
               </div>
 

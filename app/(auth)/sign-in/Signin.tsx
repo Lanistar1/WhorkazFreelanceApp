@@ -17,7 +17,7 @@ const Signin = () => {
       <div className="flex flex-row lg:flex-row h-screen">
         {/* Left Section - Background and Testimonials */}
         <div
-          className="relative w-full lg:w-1/2 bg-[#3900DC] flex justify-center items-center p-8"
+          className="hidden lg:flex relative w-full lg:w-1/2 bg-[#3900DC] flex justify-center items-center p-8"
         >
           
           {/* Content Overlay */}
@@ -54,9 +54,8 @@ const Signin = () => {
         </div>
 
         {/* Right Section - Signup Form */}
-        <div className="w-full lg:w-1/2 flex  p-8 bg-[#FFFDFA]  transition-colors duration-300 pt-20">
-            
-          <div className="w-full mx-6 my-12 p-8 rounded-2xl bg-white  ">
+        <div className="w-full max-w-[450px] lg:max-w-full lg:w-1/2 flex  lg:p-8 bg-[#FFFDFA]  transition-colors duration-300 mt-0 md:mt-5">            
+          <div className="w-full mx-6 my-12 p-0 md:p-8 rounded-2xl bg-white  ">
             {/* "Looking for work?" link at top right (Desktop) */}
           <div className="absolute top-8 right-8 text-sm hidden lg:block">
             <a  className="hover:underline text-[#4B4B56] font-semibold">
@@ -65,7 +64,7 @@ const Signin = () => {
             </a>
           </div>
             {/* Logo */}
-            <div className="flex -mb-3 -ml-2">
+            <div className="flex -mb-3 ml-20 md:-ml-2">
               <Image
                 src="/assets/icons/AppLogo.png"
                 alt="Whorkaz Logo"
@@ -74,12 +73,19 @@ const Signin = () => {
                 className="object-contain"
               />
             </div>
-            <h2 className="text-[28px] md:text-[28px] font-semibold text-[#191926] dark:text-[[#191926]] my-4">
+            {/* This will only appear on small screen */}
+            <div className="text-sm lg:block ml-13 lg:hidden my-4">
+              <a  className="hover:underline text-[#4B4B56] font-semibold">
+                Looking for work?
+                <span className="font-semibold text-[#2E00B0] cursor-pointer"> Join as a freelancer</span>
+              </a>
+            </div>
+            <h2 className="text-[20px] ml-10 md:ml-0 md:text-[28px] font-semibold text-[#191926] dark:text-[[#191926]] mb-4 md:mb-0 md:my-4 ">
               Sign in to find trusted experts
             </h2>
 
             {/* Social Login Buttons */}
-            <div className="flex flex-col w-[450px] sm:flex-row gap-3 mb-6 mt-2">
+            <div className="flex flex-col ml-15 md:ml-0 w-[250px] md:w-[450px] sm:flex-row gap-3 mb-6 mt-2">
               <button className="cursor-pointer flex-1 flex items-center text-[14px] font-semibold justify-center gap-2 bg-white dark:bg-white text-[#4B4B56] dark:text-[#4B4B56] border border-gray-100 dark:border-gray-700 rounded-[32px] py-3 transition-colors">
                 <Image
                   src="/assets/icons/apple-icon.png"
@@ -132,9 +138,12 @@ const Signin = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <div className="flex justify-start items-center cursor-pointer mt-6">
+              <Link href="/dashboard">
+               <div className="flex justify-start items-center cursor-pointer mt-6 ml-15 md:ml-0">
                  <CustomButton title="Continue with Whorkaz" onClick={() => alert("Button clicked!")} />
               </div>
+              </Link>
+             
               {/* <button
                 type="submit"
                 className="w-full bg-[#3900DC] dark:bg-[#4A00F4] text-white py-3 rounded-lg hover:bg-[#4A00F4] dark:hover:bg-[#3900DC] transition-colors font-semibold"
@@ -144,7 +153,7 @@ const Signin = () => {
             </form>
 
             {/* Login Link */}
-            <div className="flex justify-start items-center mb-3 mt-2 gap-2">
+            <div className="flex justify-start items-center mb-3 mt-2 gap-2 ml-20 md:ml-0">
               <p className=" text-start text-sm text-gray-600 dark:text-gray-400">Don’t have an account?</p>
               <Link href="/sign-up">
                 <p className=" cursor-pointer text-[#3900DC] dark:text-[#4A00F4] hover:underline font-semibold">Sign up</p> 
