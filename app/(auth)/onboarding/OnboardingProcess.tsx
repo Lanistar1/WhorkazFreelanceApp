@@ -68,7 +68,7 @@ const OnboardingProcess = () => {
   };
 
   const handleContinueStep1 = () => {
-    if (selectedServices.length > 0) {
+    if (selectedServices.length > 1) {
       console.log(`Selected services: ${selectedServices.join(", ")}`);
       setStep(2);
     }
@@ -301,12 +301,12 @@ const OnboardingProcess = () => {
                       placeholder="Title label"
                       value={cert.title}
                       onChange={(e) => updateCertification(index, "title", e.target.value)}
-                      className="flex-1 p-3 rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
+                      className="flex-1 p-3 text-[#4B4B56] rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
                     />
                     <select
                       value={cert.year}
                       onChange={(e) => updateCertification(index, "year", e.target.value)}
-                      className="w-32 p-3 rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
+                      className="w-32 p-3 rounded-lg text-[#4B4B56] border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
                     >
                       {yearOptions.map((year) => (
                         <option key={year} value={year}>
@@ -342,7 +342,7 @@ const OnboardingProcess = () => {
                   value={serviceDescription}
                   onChange={(e) => setServiceDescription(e.target.value)}
                   rows={4}
-                  className="w-full p-3 rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC] resize-none"
+                  className="w-full p-3 rounded-lg text-[#4B4B56] border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC] resize-none"
                 />
               </div>
 
@@ -356,12 +356,12 @@ const OnboardingProcess = () => {
                       placeholder="English"
                       value={lang.language}
                       onChange={(e) => updateLanguage(index, "language", e.target.value)}
-                      className="flex-1 p-3 rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
+                      className="flex-1 p-3 rounded-lg text-[#4B4B56] border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
                     />
                     <select
                       value={lang.year}
                       onChange={(e) => updateLanguage(index, "year", e.target.value)}
-                      className="w-32 p-3 rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
+                      className="w-32 p-3 rounded-lg text-[#4B4B56] border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
                     >
                       {yearOptions.map((year) => (
                         <option key={year} value={year}>
@@ -421,7 +421,7 @@ const OnboardingProcess = () => {
                   placeholder="Add project title"
                   value={projectTitle}
                   onChange={(e) => setProjectTitle(e.target.value)}
-                  className="w-full p-3 rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
+                  className="w-full p-3 text-[#4B4B56] rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
                 />
               </div>
 
@@ -434,7 +434,7 @@ const OnboardingProcess = () => {
                   value={projectDescription}
                   onChange={(e) => setProjectDescription(e.target.value)}
                   rows={6}
-                  className="w-full p-3 rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC] resize-none"
+                  className="w-full p-3 text-[#4B4B56] rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC] resize-none"
                 />
               </div>
 
@@ -444,7 +444,7 @@ const OnboardingProcess = () => {
                 <select
                   value={skillsUsed}
                   onChange={(e) => setSkillsUsed(e.target.value)}
-                  className="w-full p-3 rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
+                  className="w-full p-3 text-[#4B4B56] rounded-lg border border-[#E5E5E9] bg-white focus:outline-none focus:border-[#3900DC]"
                 >
                   <option value="" disabled>
                     Find skills

@@ -72,7 +72,7 @@ export const Navbar = () => {
     const navItems = [
         { name: 'Dashboard', icon: <DashboardIcon />, link: '/dashboard' },
         { name: 'My jobs', icon: <JobsIcon />, link: '/my-job' },
-        { name: 'Discover', icon: <DiscoverIcon />, link: '/discover' },
+        { name: 'Explore', icon: <DiscoverIcon />, link: '/explore' },
     ];
 
     const exploreItems = [
@@ -182,9 +182,10 @@ export const Navbar = () => {
                     {[
                         { name: 'Dashboard', icon: <DashboardIcon />, link: '/dashboard' },
                         { name: 'My jobs', icon: <JobsIcon />, link: '/my-job' },
-                        { name: 'Discover', icon: <DiscoverIcon />, link: '/discover' },
+                        { name: 'Explore', icon: <DiscoverIcon />, link: '/explore' },
                         { name: 'Courses', icon: <CoursesIcon />, link: '/courses' },
                         { name: 'Messages', icon: <MessagesIcon />, link: '/messages' },
+                        { name: 'Settings', icon: <MessagesIcon />, link: '/settings' },
                     ].map((item) => (
                         <a 
                             key={item.name} 
