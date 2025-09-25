@@ -64,7 +64,7 @@ const MyJob = () => {
           </button>
           <button className="flex items-center justify-between px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-300 rounded-full text-[16px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors">
             <Image
-                src="/assets/icons/filter.png"
+                src="/assets/icons/filterIcon.png"
                 alt="Filter"
                 width={18}
                 height={18}

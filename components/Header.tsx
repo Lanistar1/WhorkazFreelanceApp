@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         <Bell className="h-5 w-5 text-gray-500 dark:text-gray-500" />
         <MessageSquare className="hidden md:flex h-5 w-5 text-gray-500 dark:text-gray-500" />
 
-        <button className="hidden md:flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-300 bg-[#3900DC] rounded-full text-[14px] text-white font-bold hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors">
+        <button className="hidden md:flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-300 rounded-full text-[16px] text-[#32323E] font-semibold hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors">
           <Wallet className="h-4 w-4" />
           <span>Connect wallet</span>
         </button>
