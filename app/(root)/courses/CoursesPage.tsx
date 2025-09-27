@@ -222,7 +222,6 @@ const CoursesPage = () => {
         </div>
 
         {/* Search Bar */}
-        {/* Search Bar */}
         <div className="relative mb-8">
         <Image
             src="/assets/icons/searchIcon.png" // Replace with actual search icon path

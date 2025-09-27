@@ -72,7 +72,7 @@ export const Navbar = () => {
     const navItems = [
         { name: 'Dashboard', icon: <DashboardIcon />, link: '/dashboard' },
         { name: 'My jobs', icon: <JobsIcon />, link: '/my-job' },
-        { name: 'Explore', icon: <DiscoverIcon />, link: '/explore' },
+        { name: 'Explore jobs', icon: <DiscoverIcon />, link: '/explore' },
     ];
 
     const exploreItems = [
