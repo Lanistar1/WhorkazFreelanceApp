@@ -1,12 +1,12 @@
 import React from "react";
-import ExploreDetails from "./ExploreDetails";
+import CourseDetail from "./CourseDetail";
 
 interface Props {
   params: { id: string };
 }
 
 const Page = ({ params: { id } }: Props) => {
-  return <ExploreDetails id={id} />;
+  return <CourseDetail id={id} />;
 };
 
 export default Page;

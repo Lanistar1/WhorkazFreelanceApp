@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import Image from "next/image";
+import Link from "next/link";
 
 interface Course {
   id: string;
@@ -106,7 +107,8 @@ const CoursesPage = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {popularCourses.map((course) => (
-                  <div
+                <Link href={`/courses/${course.id}`} key={course.id}>
+                    <div
                     key={course.id}
                     className="bg-white dark:bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm"
                   >
@@ -130,6 +132,9 @@ const CoursesPage = () => {
                       </p>
                     </div>
                   </div>
+                </Link>
+
+                  
                 ))}
               </div>
             </div>
