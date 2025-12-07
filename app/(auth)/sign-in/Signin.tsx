@@ -5,10 +5,51 @@ import { useState } from "react";
 import CustomInputField from "@/components/CustomInputField";
 import CustomButton from "@/components/CustomButton";
 import Link from "next/link";
+import { useSigninAccount } from "@/app/actions/reactQuery";
+import { useAuth } from "@/app/context/AuthContext";
+import { toast } from "react-toastify";
 
 const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  const { mutateAsync: loginUser, isPending } = useSigninAccount();
+  const { login } = useAuth();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!formData.email || !formData.password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    try {
+      const response = await loginUser({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
+
+      // Success — save user + token
+      login(response.data.user, response.data.token);
+      // Redirect happens inside AuthContext login()
+    } catch (error) {
+      // Error already shown via onError in useSigninAccount
+    }
+  };
 
 
   return (
@@ -121,35 +162,38 @@ const Signin = () => {
             </div>
 
             {/* Email and Password Fields */}
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <CustomInputField
                 label="Email address"
                 type="email"
+                name="email"
                 placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleInputChange}
                 required
               />
               <CustomInputField
                 label="Password"
                 type="password"
+                name="password"
                 placeholder="Password should be 8 or more characters long"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={handleInputChange}
                 required
               />
-              <Link href="/dashboard">
+              <div className="flex justify-start items-center cursor-pointer mt-6 ml-15 md:ml-0">
+                <CustomButton
+                  title={isPending ? "Signing in..." : "Continue with Whorkaz"}
+                  isLoading={isPending}
+                  disabled={isPending}
+                />
+              </div>
+              {/* <Link href="/dashboard">
                <div className="flex justify-start items-center cursor-pointer mt-6 ml-15 md:ml-0">
                  <CustomButton title="Continue with Whorkaz"/>
               </div>
-              </Link>
+              </Link> */}
              
-              {/* <button
-                type="submit"
-                className="w-full bg-[#3900DC] dark:bg-[#4A00F4] text-white py-3 rounded-lg hover:bg-[#4A00F4] dark:hover:bg-[#3900DC] transition-colors font-semibold"
-              >
-                Create account
-              </button> */}
             </form>
 
             {/* Login Link */}

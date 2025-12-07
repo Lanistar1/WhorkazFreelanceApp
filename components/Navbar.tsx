@@ -76,7 +76,7 @@ export const Navbar = () => {
     ];
 
     const exploreItems = [
-        { name: 'Courses', icon: <CoursesIcon />, link: '/courses' },
+        { name: 'Apprenticeship', icon: <CoursesIcon />, link: '/courses' },
         { name: 'Messages', icon: <MessagesIcon />, link: '/messages' },
         { name: 'Payments', icon: <PaymentsIcon />, link: '/payments' },
         { name: 'Settings', icon: <SettingsIcon />, link: '/settings' },
@@ -107,7 +107,7 @@ export const Navbar = () => {
                         className="object-contain"
                     />
                         <div>
-                            <div className="text-[14px] font-medium text-[#32323E]">CLIENT WORKSPACE</div>
+                            <div className="text-[14px] font-medium text-[#32323E]">FREELANCER WORKSPACE</div>
                             <div className="text-[16px] font-semibold text-[#95959F]">Jason Alexander</div>
                         </div>
                     </div>
@@ -183,7 +183,7 @@ export const Navbar = () => {
                         { name: 'Dashboard', icon: <DashboardIcon />, link: '/dashboard' },
                         { name: 'My jobs', icon: <JobsIcon />, link: '/my-job' },
                         { name: 'Explore', icon: <DiscoverIcon />, link: '/explore' },
-                        { name: 'Courses', icon: <CoursesIcon />, link: '/courses' },
+                        { name: 'Apprenticeship', icon: <CoursesIcon />, link: '/courses' },
                         { name: 'Messages', icon: <MessagesIcon />, link: '/messages' },
                         { name: 'Settings', icon: <MessagesIcon />, link: '/settings' },
                     ].map((item) => (
