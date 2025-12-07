@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import Image from "next/image";
@@ -5,12 +6,91 @@ import { useState } from "react";
 import CustomInputField from "@/components/CustomInputField";
 import CustomButton from "@/components/CustomButton";
 import Link from "next/link";
+import { useCreateAccount } from "@/app/actions/reactQuery";
+import { z } from "zod";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+
+
+const signupSchema = z
+  .object({
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmpassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmpassword, {
+    message: "Passwords do not match",
+    path: ["confirmpassword"],
+  });
 
 const Signup = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const router = useRouter();
   const [confirmpassword, setConfirmPassword] = useState("");
 
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    userType: "workman"
+  });
+
+ 
+  const [formErrors, setFormErrors] = useState<{
+    email?: string[];
+    password?: string[];
+    confirmpassword?: string[];  // Add this
+  }>({});  
+
+
+  const { mutateAsync: createUserAccount, isPending: isCreatingAccount } = useCreateAccount();
+  
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormErrors({});
+
+    const result = signupSchema.safeParse({
+      ...formData,
+      confirmpassword,
+    });
+
+    if (!result.success) {
+      setFormErrors(result.error.flatten().fieldErrors);
+      return;
+    }
+
+    try {
+      const response = await createUserAccount(formData);
+
+      console.log("my response", response)
+
+      // The API returns 201 + { success: true, data: { token } }
+      if (response.success == true) {
+        const token = response.data.token; // This is your JWT
+
+        console.log("my token", token)
+
+        // Save token to localStorage
+        localStorage.setItem("authToken", token);
+
+        toast.success("Signup successful!");
+        router.push("/onboarding");
+      } else {
+        toast.error(response.data?.message || "Failed to create account");
+      }
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || "Something went wrong");
+    }
+  };
 
   return (
     <>
@@ -123,29 +203,34 @@ const Signup = () => {
             </div>
 
             {/* Email and Password Fields */}
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <CustomInputField
                 label="Email address"
                 type="email"
+                name="email"
                 placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={handleInputChange}
                 required
               />
               <CustomInputField
                 label="Password"
                 type="password"
+                name="password"
                 placeholder="Password should be 8 or more characters long"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}  
+                onChange={handleInputChange}
                 required
               />
               <CustomInputField
                 label="Re-write Password"
                 type="password"
-                placeholder="Password should be 8 or more characters long"
+                name="confirmpassword"   
                 value={confirmpassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  e.stopPropagation();   // ← prevents handleInputChange from running
+                }}
                 required
               />
               <div className="flex items-center">
@@ -163,11 +248,14 @@ const Signup = () => {
                   and Privacy Policy</span>
                 </label>
               </div>
-              <Link href="/onboarding">
+               <div className="flex justify-start items-center cursor-pointer ml-15 md:ml-0">
+                <CustomButton title="Create account" type="submit" isLoading={isCreatingAccount}/>
+              </div>
+              {/* <Link href="/onboarding">
                 <div className="flex justify-start items-center cursor-pointer ml-15 md:ml-0">
                   <CustomButton title="Create account" />
                 </div>
-              </Link>
+              </Link> */}
             </form>
 
             {/* Login Link */}

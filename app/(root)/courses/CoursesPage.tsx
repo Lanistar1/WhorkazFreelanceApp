@@ -199,9 +199,12 @@ const CoursesPage = () => {
           <h1 className="text-[20px] md:text-[24px] font-semibold text-[#32323E]">
             Grow Your Career.
           </h1>
-          <button className="px-4 md:px-6 py-3 bg-[#3900DC] text-white rounded-full text-[12px] md:text-[16px] font-medium hover:bg-purple-700 transition-colors">
-            + Create new course
-          </button>
+          <Link href="/courses/new-course">
+            <button className="px-4 md:px-6 py-3 bg-[#3900DC] text-white rounded-full text-[12px] md:text-[16px] font-medium hover:bg-purple-700 transition-colors">
+              + Create new course
+            </button>
+          </Link>
+          
         </div>
 
         {/* Tabs */}

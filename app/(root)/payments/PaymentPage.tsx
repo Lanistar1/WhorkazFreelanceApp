@@ -1,8 +1,9 @@
 'use client'
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MoreHorizontal } from "lucide-react";
 import Header from "@/components/Header";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 interface Payment {
   posted: string;
@@ -30,6 +31,38 @@ const getStatusClass = (status: Payment['status']) => {
 };
 
 const PaymentPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalPosition, setModalPosition] = useState({ top: 0, right: 0 });
+  const [selectedJob, setSelectedJob] = useState<Payment | null>(null);
+  const iconRef = useRef<HTMLSpanElement>(null);
+  //const router = useRouter();
+
+  const handleIconClick = (event: React.MouseEvent, payments: Payment) => {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    setModalPosition({
+      top: rect.bottom + window.scrollY, // Position below the icon
+      right: rect.left + window.scrollX - 120, // Adjust left to center the modal relative to the icon
+    });
+    setSelectedJob(payments);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedJob(null);
+  };
+
+  // Close modal if clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (iconRef.current && !iconRef.current.contains(event.target as Node)) {
+        setIsModalOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+    
   const payments: Payment[] = [
     {
       posted: 'Posted: May 25, 2025',
@@ -158,7 +191,8 @@ const PaymentPage = () => {
                     </td>
                     <td className="p-4 w-full sm:w-auto">
                       <span className="sm:hidden font-medium text-[#4B4B56]">Actions: </span>
-                      <MoreHorizontal className="h-5 w-5 text-gray-500 dark:text-gray-500 cursor-pointer" />
+                      <MoreHorizontal className="h-5 w-5 text-gray-500 dark:text-gray-500 cursor-pointer" 
+                      onClick={(e) => handleIconClick(e, payments)}/>
                     </td>
                   </tr>
                 ))
@@ -184,6 +218,47 @@ const PaymentPage = () => {
             </tbody>
           </table>
         </div>
+
+        {isModalOpen && selectedJob && (
+        <div
+          className="fixed bg-white dark:bg-white border border-[#DBDBE3] rounded-[8px] shadow-lg p-2 z-50"
+          style={{
+            top: `${modalPosition.top}px`,
+            left: `${modalPosition.right}px`,
+            minWidth: "200px",
+          }}
+        >
+          <ul className="text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56]">
+            <li
+              className="px-4 py-2 text-[16px] font-semibold text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 rounded-t-[8px] cursor-pointer"
+              onClick={closeModal}
+            >
+                View work
+            </li>
+            <li
+              className="px-4 py-2 hover:bg-gray-100 text-[16px] font-semibold text-[#4B4B56] dark:hover:bg-gray-100 cursor-pointer"
+              onClick={closeModal}
+            >
+              Mark as complete
+            </li>
+            <li
+              className="px-4 py-2 text-[16px] font-semibold text-[#FF2929] hover:bg-gray-100 dark:hover:bg-gray-100 rounded-b-[8px] cursor-pointer"
+              onClick={closeModal}
+            >
+              Decline job
+            </li>
+          </ul>
+          {/* Arrow pointing to the icon */}
+          <div
+            className="absolute w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-b-[8px] border-b-white dark:border-b-white"
+            style={{
+              top: "-8px",
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          />
+        </div>
+      )}
       </main>
     </div>
   );
