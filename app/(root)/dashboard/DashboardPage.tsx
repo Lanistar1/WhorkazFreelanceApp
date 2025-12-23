@@ -3,6 +3,7 @@ import React from "react";
 //import { Bell, MessageSquare, Wallet } from "lucide-react";
 import Image from "next/image";
 import Header from "@/components/Header";
+import Link from "next/link";
 
 const DashboardPage = () => {
   return (
@@ -18,7 +19,9 @@ const DashboardPage = () => {
             <h2 className="text-2xl font-bold mb-2">Looking for work? We have 100 jobs that {"\n"} currently match your skills.</h2>
             <p className="text-[#95959F] dark:text-gray-600 mb-4">Clients trust complete profiles. Fill in your skills, experience, and upload an ID.</p>
             <div className="flex space-x-4">
-              <button className="bg-[#3900DC] text-white px-4 py-2 rounded-full font-medium hover:bg-purple-700 transition-colors">Find your next  job </button>
+              <Link href='/explore'>
+                <button className="bg-[#3900DC] text-white px-4 py-2 rounded-full font-medium hover:bg-purple-700 transition-colors">Find your next  job </button>
+              </Link>
             </div>
           </div>
 

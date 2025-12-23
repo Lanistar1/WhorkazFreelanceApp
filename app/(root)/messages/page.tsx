@@ -4,7 +4,7 @@ import MessagePage from './MessagePage'
 const page = () => {
   return (
     <div>
-      <MessagePage />
+      <MessagePage initialUserId={null}/>
     </div>
   )
 }

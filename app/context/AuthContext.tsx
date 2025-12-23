@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (userData.userType === "workman") {
       router.push("/dashboard");
     } else {
-      router.push("/freelancer-dashboard");
+      //router.push("/freelancer-dashboard");
     }
   };
 
