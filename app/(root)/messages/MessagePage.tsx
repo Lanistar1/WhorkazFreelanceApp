@@ -1,8 +1,12 @@
 // 'use client'
 // import React, { useState, useRef, useEffect } from "react";
 // import { Send, Phone, Video, MoreHorizontal, Search, Smile, Paperclip, MessageCircle } from "lucide-react";
-// import Header from "@/components/Header";
+// // import Header from "@/components/Header"; // This component is not included in the provided code, so it's commented out to prevent errors.
 // import Image from "next/image";
+// import Header from "@/components/Header";
+
+// // NOTE: I've replaced your local image paths with valid placeholders
+// // to ensure the component renders correctly. You can swap these back.
 
 // interface User {
 //   id: string;
@@ -140,7 +144,7 @@
 //         sender: {
 //           id: 'user',
 //           name: 'You',
-//           avatar: '/assets/images/person3.png',
+//           avatar: 'https://placehold.co/40x40/555555/FFFFFF?text=You',
 //         },
 //         content: newMessage.trim(),
 //         type: 'text',
@@ -191,174 +195,195 @@
 
 //   return (
 //     <div className="min-h-screen w-full bg-white dark:bg-white text-gray-900 dark:text-gray-900">
-//         <Header title="Messages" />
-//         <div className="h-screen w-full bg-white dark:bg-white text-gray-900 dark:text-gray-900 flex">
+//       <Header title="Messages" />
+//       <div className="h-screen w-full bg-white dark:bg-white text-gray-900 dark:text-gray-900 flex">
       
-//             {/* Sidebar - Users List */}
-//             <div className="w-full sm:w-[400px] border-r border-[#DBDBE3] flex flex-col bg-white dark:bg-white">
-//                 {/* Search */}
-//                 <div className="p-4 border-b border-[#DBDBE3]">
+//         {/* Sidebar - Users List */}
+//         <div className={`
+//           w-full sm:w-[400px] border-r border-[#DBDBE3] flex flex-col bg-white dark:bg-white
+//           ${selectedUser ? 'hidden sm:flex' : 'flex'}
+//         `}>
+//           {/* Search */}
+//           <div className="p-4 border-b border-[#DBDBE3]">
+//             <div className="relative">
+//               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+//               <input
+//                 type="text"
+//                 placeholder="Search messages"
+//                 value={searchQuery}
+//                 onChange={(e) => setSearchQuery(e.target.value)}
+//                 className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] focus:outline-none focus:ring-2 focus:ring-[#220084]"
+//               />
+//             </div>
+//           </div>
+
+//           {/* Users List */}
+//           <div className="flex-1 overflow-y-auto">
+//             {filteredUsers.map((user) => (
+//               <div
+//                 key={user.id}
+//                 onClick={() => setSelectedUser(user)}
+//                 className={`p-4 border-b border-gray-100 dark:border-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-50 transition-colors flex items-center space-x-3 ${
+//                   selectedUser?.id === user.id ? 'bg-purple-50 border-r-2 border-[#220084]' : ''
+//                 }`}
+//               >
 //                 <div className="relative">
-//                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-//                     <input
-//                     type="text"
-//                     placeholder="Search messages"
-//                     value={searchQuery}
-//                     onChange={(e) => setSearchQuery(e.target.value)}
-//                     className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] focus:outline-none focus:ring-2 focus:ring-[#220084]"
-//                     />
+//                   <Image
+//                     src={user.avatar}
+//                     alt={user.name}
+//                     width={48}
+//                     height={48}
+//                     className="rounded-full object-cover"
+//                   />
+//                   {user.isOnline && (
+//                     <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+//                   )}
 //                 </div>
+//                 <div className="flex-1 min-w-0">
+//                   <div className="flex items-center justify-between">
+//                     <span className="text-[16px] font-semibold text-[#32323E] truncate">{user.name}</span>
+//                     <span className="text-[12px] text-[#95959F]">{formatTimeAgo(user.time)}</span>
+//                   </div>
+//                   <p className="text-[14px] text-[#4B4B56] truncate mt-1">{user.lastMessage}</p>
+//                   {user.unreadCount && user.unreadCount > 0 && (
+//                     <div className="w-5 h-5 bg-[#220084] text-white text-[10px] rounded-full flex items-center justify-center mt-1">
+//                       {user.unreadCount > 9 ? '9+' : user.unreadCount}
+//                     </div>
+//                   )}
 //                 </div>
-
-//                 {/* Users List */}
-//                 <div className="flex-1 overflow-y-auto">
-//                 {filteredUsers.map((user) => (
-//                     <div
-//                     key={user.id}
-//                     onClick={() => setSelectedUser(user)}
-//                     className={`p-4 border-b border-gray-100 dark:border-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-50 transition-colors flex items-center space-x-3 ${
-//                         selectedUser?.id === user.id ? 'bg-purple-50 border-r-2 border-[#220084]' : ''
-//                     }`}
-//                     >
-//                     <div className="relative">
-//                         <Image
-//                         src={user.avatar}
-//                         alt={user.name}
-//                         width={48}
-//                         height={48}
-//                         className="rounded-full object-cover"
-//                         />
-//                         {user.isOnline && (
-//                         <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-//                         )}
-//                     </div>
-//                     <div className="flex-1 min-w-0">
-//                         <div className="flex items-center justify-between">
-//                         <span className="text-[16px] font-semibold text-[#32323E] truncate">{user.name}</span>
-//                         <span className="text-[12px] text-[#95959F]">{formatTimeAgo(user.time)}</span>
-//                         </div>
-//                         <p className="text-[14px] text-[#4B4B56] truncate mt-1">{user.lastMessage}</p>
-//                         {user.unreadCount && user.unreadCount > 0 && (
-//                         <div className="w-5 h-5 bg-[#220084] text-white text-[10px] rounded-full flex items-center justify-center mt-1">
-//                             {user.unreadCount > 9 ? '9+' : user.unreadCount}
-//                         </div>
-//                         )}
-//                     </div>
-//                     </div>
-//                 ))}
-//                 </div>
-//             </div>
-
-//             {/* Chat Area */}
-//             <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-50">
-//                 {selectedUser ? (
-//                 <>
-//                     {/* Chat Header */}
-//                     <div className="p-4 border-b border-[#DBDBE3] bg-white dark:bg-white flex items-center justify-between">
-//                     <div className="flex items-center space-x-3">
-//                         <Image
-//                         src={selectedUser.avatar}
-//                         alt={selectedUser.name}
-//                         width={48}
-//                         height={48}
-//                         className="rounded-full object-cover"
-//                         />
-//                         <div>
-//                         <div className="text-[16px] font-semibold text-[#32323E]">{selectedUser.name}</div>
-//                         <div className="flex items-center space-x-2 text-[12px] text-[#95959F]">
-//                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-//                             <span>Online</span>
-//                         </div>
-//                         </div>
-//                     </div>
-//                     <div className="flex items-center space-x-2">
-//                         <button className="px-4 py-2 bg-white border border-gray-200 text-black rounded-full text-[14px] font-medium whitespace-nowrap ml-2">
-//                         View work details
-//                         </button>
-//                         <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-//                         <Phone className="h-4 w-4 text-gray-500" />
-//                         </button>
-//                         <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-//                         <Paperclip className="h-4 w-4 text-gray-500" />
-//                         </button>
-//                     </div>
-//                     </div>
-
-//                     {/* Messages Container */}
-//                     <div className="flex-1 overflow-y-auto p-4 space-y-4">
-//                     {messages.map((message) => (
-//                         <div
-//                         key={message.id}
-//                         className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
-//                         >
-//                         <div
-//                             className={`max-w-[70%] p-3 rounded-2xl ${
-//                             message.isOwn
-//                                 ? 'bg-[#220084] text-white rounded-br-sm'
-//                                 : 'bg-white border border-gray-200 dark:border-gray-700 rounded-bl-sm'
-//                             }`}
-//                         >
-//                             {message.type === 'text' ? (
-//                             <p className="text-[14px] leading-relaxed">{message.content}</p>
-//                             ) : (
-//                             <div className="flex items-center space-x-2">
-//                                 <Paperclip className="h-4 w-4 text-[#220084]" />
-//                                 <span className="text-[12px] text-[#220084]">{message.fileName}</span>
-//                             </div>
-//                             )}
-//                             <div className="flex items-center justify-end mt-1 text-[11px] opacity-75">
-//                             <span>{message.timestamp}</span>
-//                             {message.isOwn && <div className="ml-1">✓✓</div>}
-//                             </div>
-//                         </div>
-//                         </div>
-//                     ))}
-//                     <div ref={messagesEndRef} />
-//                     </div>
-
-//                     {/* Input Area */}
-//                     <div className="p-4 border-t border-[#DBDBE3] bg-white dark:bg-white">
-//                     <form onSubmit={handleSendMessage} className="flex items-end space-x-2">
-//                         <div className="flex-1 relative">
-//                         <input
-//                             ref={inputRef}
-//                             type="text"
-//                             value={newMessage}
-//                             onChange={(e) => setNewMessage(e.target.value)}
-//                             onKeyPress={handleKeyPress}
-//                             placeholder="Type a message..."
-//                             className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] focus:outline-none focus:ring-2 focus:ring-[#220084] resize-none"
-//                         />
-//                         </div>
-//                         <button
-//                         type="submit"
-//                         disabled={!newMessage.trim()}
-//                         className={`p-3 rounded-full transition-all ${
-//                             newMessage.trim()
-//                             ? 'bg-[#220084] text-white hover:bg-purple-700'
-//                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-//                         }`}
-//                         >
-//                         <Send className="h-5 w-5" />
-//                         </button>
-//                         <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-//                         <Paperclip className="h-4 w-4 text-gray-500" />
-//                         </button>
-//                     </form>
-//                     </div>
-//                 </>
-//                 ) : (
-//                 // Empty state
-//                 <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-//                     <div className="w-16 h-16 bg-[#220084] rounded-full flex items-center justify-center mb-4">
-//                     <MessageCircle className="h-8 w-8 text-gray-400" />
-//                     </div>
-//                     <h3 className="text-[18px] font-semibold text-[#32323E] mb-2">No chat selected</h3>
-//                     <p className="text-[14px] text-[#95959F]">Select a conversation to start messaging</p>
-//                 </div>
-//                 )}
-//             </div>
+//               </div>
+//             ))}
+//           </div>
 //         </div>
+
+//         {/* Chat Area */}
+//         <div className={`
+//           flex-1 flex-col bg-gray-50 dark:bg-gray-50
+//           ${!selectedUser ? 'hidden sm:flex' : 'flex'}
+//         `}>
+//           {selectedUser ? (
+//             <>
+//               {/* Chat Header */}
+//               <div className="p-4 border-b border-[#DBDBE3] bg-white dark:bg-white flex items-center justify-between">
+//                 {/* Back button for mobile */}
+//                 <button
+//                   onClick={() => setSelectedUser(null)}
+//                   className="p-2 mr-2 sm:hidden hover:bg-gray-100 rounded-full transition-colors"
+//                 >
+//                   <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+//                   </svg>
+//                 </button>
+//                 <div className="flex items-center space-x-3 flex-1 min-w-0">
+//                   <Image
+//                     src={selectedUser.avatar}
+//                     alt={selectedUser.name}
+//                     width={48}
+//                     height={48}
+//                     className="rounded-full object-cover"
+//                   />
+//                   <div className="min-w-0">
+//                     <div className="text-[16px] font-semibold text-[#32323E] truncate">{selectedUser.name}</div>
+//                     <div className="flex items-center space-x-2 text-[12px] text-[#95959F]">
+//                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+//                       <span>Online</span>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="flex items-center space-x-2">
+//                   <button className="px-4 py-2 bg-white border border-gray-200 text-black rounded-full text-[14px] font-medium whitespace-nowrap ml-2 hidden sm:inline-flex">
+//                     View work details
+//                   </button>
+//                   <button className="p-2 hover:bg-gray-100 rounded-full transition-colors hidden sm:block">
+//                     <Phone className="h-4 w-4 text-gray-500" />
+//                   </button>
+//                   <button className="p-2 hover:bg-gray-100 rounded-full transition-colors hidden sm:block">
+//                     <Paperclip className="h-4 w-4 text-gray-500" />
+//                   </button>
+//                 </div>
+//               </div>
+
+//               {/* Messages Container */}
+//               <div className="flex-1 overflow-y-auto p-4 space-y-4">
+//                 {messages.map((message) => (
+//                   <div
+//                     key={message.id}
+//                     className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
+//                   >
+//                     <div
+//                       className={`max-w-[70%] p-3 rounded-2xl ${
+//                         message.isOwn
+//                           ? 'bg-[#220084] text-white rounded-br-sm'
+//                           : 'bg-white border border-gray-200 dark:border-gray-700 rounded-bl-sm'
+//                       }`}
+//                     >
+//                       {message.type === 'text' ? (
+//                         <p className="text-[14px] leading-relaxed">{message.content}</p>
+//                       ) : (
+//                         <div className="flex items-center space-x-2">
+//                           <Paperclip className="h-4 w-4 text-[#220084]" />
+//                           <span className="text-[12px] text-[#220084]">{message.fileName}</span>
+//                         </div>
+//                       )}
+//                       <div className="flex items-center justify-end mt-1 text-[11px] opacity-75">
+//                         <span>{message.timestamp}</span>
+//                         {message.isOwn && <div className="ml-1">✓✓</div>}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 ))}
+//                 <div ref={messagesEndRef} />
+//               </div>
+
+//               {/* Input Area */}
+//               <div className="p-4 border-t border-[#DBDBE3] bg-white dark:bg-white">
+//                 <form onSubmit={handleSendMessage} className="flex items-end space-x-2">
+//                   <div className="flex-1 relative">
+//                     <input
+//                       ref={inputRef}
+//                       type="text"
+//                       value={newMessage}
+//                       onChange={(e) => setNewMessage(e.target.value)}
+//                       onKeyPress={handleKeyPress}
+//                       placeholder="Type a message..."
+//                       className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] focus:outline-none focus:ring-2 focus:ring-[#220084] resize-none"
+//                     />
+//                     <button
+//                       type="button"
+//                       className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+//                     >
+//                       <Smile className="h-5 w-5 text-gray-400" />
+//                     </button>
+//                   </div>
+//                   <button
+//                     type="submit"
+//                     disabled={!newMessage.trim()}
+//                     className={`p-3 rounded-full transition-all ${
+//                       newMessage.trim()
+//                         ? 'bg-[#220084] text-white hover:bg-purple-700'
+//                         : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+//                     }`}
+//                   >
+//                     <Send className="h-5 w-5" />
+//                   </button>
+//                   <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+//                     <Paperclip className="h-4 w-4 text-gray-500" />
+//                   </button>
+//                 </form>
+//               </div>
+//             </>
+//           ) : (
+//             // Empty state for desktop view
+//             <div className="hidden sm:flex flex-1 flex-col items-center justify-center p-8 text-center">
+//               <div className="w-16 h-16 bg-[#220084] rounded-full flex items-center justify-center mb-4">
+//                 <MessageCircle className="h-8 w-8 text-gray-400" />
+//               </div>
+//               <h3 className="text-[18px] font-semibold text-[#32323E] mb-2">No chat selected</h3>
+//               <p className="text-[14px] text-[#95959F]">Select a conversation to start messaging</p>
+//             </div>
+//           )}
+//         </div>
+//       </div>
 //     </div>
     
 //   );
@@ -370,394 +395,277 @@
 
 
 
-'use client'
+
+'use client';
+
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Phone, Video, MoreHorizontal, Search, Smile, Paperclip, MessageCircle } from "lucide-react";
-// import Header from "@/components/Header"; // This component is not included in the provided code, so it's commented out to prevent errors.
-import Image from "next/image";
+import { Send, Search } from "lucide-react";
 import Header from "@/components/Header";
+import Image from "next/image";
+import {
+  useConversations,
+  useConversationMessages,
+  useSendMessage,
+} from "@/app/actions/reactQuery";
+import { useAuth } from "@/app/context/AuthContext";
+import type { Conversation, Message } from "@/app/actions/type";
 
-// NOTE: I've replaced your local image paths with valid placeholders
-// to ensure the component renders correctly. You can swap these back.
-
-interface User {
-  id: string;
-  name: string;
-  avatar: string;
-  lastMessage: string;
-  time: string;
-  unreadCount?: number;
-  isOnline?: boolean;
+interface MessagePageProps {
+  initialUserId?: string | null;
 }
 
-interface Message {
-  id: string;
-  sender: {
-    id: string;
-    name: string;
-    avatar: string;
-  };
-  content: string;
-  type: 'text' | 'file';
-  fileName?: string;
-  fileId?: string;
-  timestamp: string;
-  isOwn: boolean;
-}
-
-const MessagePage = () => {
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+const MessagePage = ({ initialUserId }: MessagePageProps) => {
+  const { token } = useAuth();
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [newMessage, setNewMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Sample users
-  const users: User[] = [
-    {
-      id: '1',
-      name: 'Muyiwa Andela',
-      avatar: '/assets/images/person3.png',
-      lastMessage: 'Yes, I\'ll be there by 9am.',
-      time: '2:26 PM',
-      unreadCount: 4,
-      isOnline: true,
-    },
-    {
-      id: '2',
-      name: 'Sarah Johnson',
-      avatar: '/assets/images/person3.png',
-      lastMessage: 'Thanks for the update!',
-      time: 'Yesterday',
-      unreadCount: 0,
-      isOnline: false,
-    },
-    {
-      id: '3',
-      name: 'David Okon',
-      avatar: '/assets/images/person3.png',
-      lastMessage: 'Please send the invoice',
-      time: 'Today',
-      unreadCount: 2,
-      isOnline: true,
-    },
-    {
-      id: '4',
-      name: 'Aisha Bello',
-      avatar: '/assets/images/person3.png',
-      lastMessage: 'Looking forward to the meeting',
-      time: 'Yesterday',
-      unreadCount: 1,
-      isOnline: false,
-    },
-  ];
-
-  // Sample messages for selected user
-  const sampleMessages: Message[] = [
-    {
-      id: '1',
-      sender: { id: 'muyiwa', name: 'Muyiwa Andela', avatar: '/assets/images/person3.png' },
-      content: 'Can we schedule the work for Saturday morning?',
-      type: 'text',
-      timestamp: '2:26 PM',
-      isOwn: false,
-    },
-    {
-      id: '2',
-      sender: { id: 'user', name: 'You', avatar: '/assets/images/person3.png' },
-      content: 'Yes, I\'ll be there by 9am.',
-      type: 'text',
-      timestamp: '2:26 PM',
-      isOwn: true,
-    },
-    {
-      id: '3',
-      sender: { id: 'muyiwa', name: 'Muyiwa Andela', avatar: '/assets/images/person3.png' },
-      content: 'Great! Looking forward to it.',
-      type: 'text',
-      timestamp: '2:27 PM',
-      isOwn: false,
-    },
-    {
-      id: '4',
-      sender: { id: 'user', name: 'You', avatar: '/assets/images/person3.png' },
-      content: 'Me too! See you then.',
-      type: 'text',
-      timestamp: '2:28 PM',
-      isOwn: true,
-    },
-  ];
-
-  // Load messages when user is selected
+  // Auto-select the user if coming from direct link
   useEffect(() => {
-    if (selectedUser) {
-      setMessages(sampleMessages);
-    } else {
-      setMessages([]);
+    if (initialUserId && !selectedUserId) {
+      setSelectedUserId(initialUserId);
     }
-    setNewMessage('');
-  }, [selectedUser]);
+  }, [initialUserId, selectedUserId]);
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  // Fetch all conversations
+  const {
+    data: convosData,
+    isLoading: loadingConvos,
+  } = useConversations();
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Fetch messages for selected user
+  const {
+    data: messagesData,
+    isLoading: loadingMessages,
+  } = useConversationMessages(selectedUserId);
+
+  const sendMutation = useSendMessage();
+
+  // Extract data safely
+  const conversations = convosData?.data?.conversations || [];
+  const messages = messagesData?.data?.messages || [];
+
+  // Find selected conversation
+  const selectedConvo = conversations.find(
+    (c: Conversation) => c.participant.id === selectedUserId
   );
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newMessage.trim() && selectedUser) {
-      const message: Message = {
-        id: Date.now().toString(),
-        sender: {
-          id: 'user',
-          name: 'You',
-          avatar: 'https://placehold.co/40x40/555555/FFFFFF?text=You',
+  // Filter conversations by search
+  const filteredConversations = conversations.filter((c: Conversation) =>
+    c.participant.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Send message
+  const handleSend = () => {
+    if (!newMessage.trim() || !selectedUserId) return;
+
+    sendMutation.mutate(
+      {
+        receiverId: selectedUserId,
+        text: newMessage,
+        jobId: "",
+      },
+      {
+        onSuccess: () => {
+          setNewMessage("");
         },
-        content: newMessage.trim(),
-        type: 'text',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isOwn: true,
-      };
-      
-      setMessages(prev => [...prev, message]);
-      setNewMessage('');
-      
-      // Simulate reply after 2 seconds
-      setTimeout(() => {
-        const reply: Message = {
-          id: (Date.now() + 1).toString(),
-          sender: selectedUser,
-          content: selectedUser.name === 'Muyiwa Andela' 
-            ? 'Perfect! I\'ll prepare everything for Saturday.' 
-            : 'Thanks for the quick response!',
-          type: 'text',
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          isOwn: false,
-        };
-        setMessages(prev => [...prev, reply]);
-      }, 2000);
-    }
+      }
+    );
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage(e);
-    }
-  };
-
-  const formatTimeAgo = (time: string) => {
-    const now = new Date();
-    const messageTime = new Date();
-    const [hours, minutes] = time.split(':').map(Number);
-    messageTime.setHours(hours, minutes);
-    
-    const diffInMinutes = (now.getTime() - messageTime.getTime()) / (1000 * 60);
-    
-    if (diffInMinutes < 1) return 'Just now';
-    if (diffInMinutes < 60) return `${Math.floor(diffInMinutes)}m ago`;
-    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
-    return 'Yesterday';
-  };
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
-    <div className="min-h-screen w-full bg-white dark:bg-white text-gray-900 dark:text-gray-900">
+    <div className="min-h-screen bg-white flex flex-col">
       <Header title="Messages" />
-      <div className="h-screen w-full bg-white dark:bg-white text-gray-900 dark:text-gray-900 flex">
-      
-        {/* Sidebar - Users List */}
-        <div className={`
-          w-full sm:w-[400px] border-r border-[#DBDBE3] flex flex-col bg-white dark:bg-white
-          ${selectedUser ? 'hidden sm:flex' : 'flex'}
-        `}>
-          {/* Search */}
-          <div className="p-4 border-b border-[#DBDBE3]">
+
+      <div className="flex-1 flex overflow-hidden">
+        {/* Sidebar - Conversations */}
+        <div
+          className={`w-full sm:w-96 border-r border-gray-200 flex flex-col ${
+            selectedUserId ? "hidden sm:flex" : "flex"
+          }`}
+        >
+          <div className="p-4 border-b">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search messages"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] focus:outline-none focus:ring-2 focus:ring-[#220084]"
+                className="w-full pl-10 pr-4 py-3 border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
           </div>
 
-          {/* Users List */}
           <div className="flex-1 overflow-y-auto">
-            {filteredUsers.map((user) => (
-              <div
-                key={user.id}
-                onClick={() => setSelectedUser(user)}
-                className={`p-4 border-b border-gray-100 dark:border-gray-100 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-50 transition-colors flex items-center space-x-3 ${
-                  selectedUser?.id === user.id ? 'bg-purple-50 border-r-2 border-[#220084]' : ''
-                }`}
-              >
-                <div className="relative">
-                  <Image
-                    src={user.avatar}
-                    alt={user.name}
-                    width={48}
-                    height={48}
-                    className="rounded-full object-cover"
-                  />
-                  {user.isOnline && (
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[16px] font-semibold text-[#32323E] truncate">{user.name}</span>
-                    <span className="text-[12px] text-[#95959F]">{formatTimeAgo(user.time)}</span>
-                  </div>
-                  <p className="text-[14px] text-[#4B4B56] truncate mt-1">{user.lastMessage}</p>
-                  {user.unreadCount && user.unreadCount > 0 && (
-                    <div className="w-5 h-5 bg-[#220084] text-white text-[10px] rounded-full flex items-center justify-center mt-1">
-                      {user.unreadCount > 9 ? '9+' : user.unreadCount}
+            {loadingConvos ? (
+              <p className="p-4 text-center text-gray-500">Loading chats...</p>
+            ) : filteredConversations.length === 0 ? (
+              <p className="p-8 text-center text-gray-500">No conversations yet</p>
+            ) : (
+              filteredConversations.map((convo: Conversation) => (
+                <div
+                  key={convo.id}
+                  onClick={() => setSelectedUserId(convo.participant.id)}
+                  className={`p-4 hover:bg-gray-50 cursor-pointer border-b transition-colors ${
+                    selectedUserId === convo.participant.id ? "bg-purple-50" : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Image
+                      src={
+                        convo.participant.profilePic ||
+                        "/assets/images/person3.png"
+                      }
+                      alt={convo.participant.email}
+                      width={48}
+                      height={48}
+                      className="rounded-full object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">
+                        {convo.participant.email.split("@")[0]}
+                      </p>
+                      <p className="text-sm text-gray-600 truncate">
+                        {convo.lastMessage?.text || "No messages yet"}
+                      </p>
                     </div>
-                  )}
+                    {convo.unreadCount > 0 && (
+                      <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
+                        {convo.unreadCount}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
         {/* Chat Area */}
-        <div className={`
-          flex-1 flex-col bg-gray-50 dark:bg-gray-50
-          ${!selectedUser ? 'hidden sm:flex' : 'flex'}
-        `}>
-          {selectedUser ? (
+        <div className="flex-1 flex flex-col">
+          {selectedUserId ? (
+            // User is selected — show chat, even if no conversation exists yet
             <>
-              {/* Chat Header */}
-              <div className="p-4 border-b border-[#DBDBE3] bg-white dark:bg-white flex items-center justify-between">
-                {/* Back button for mobile */}
+              {/* Chat Header - Show user info even for new chats */}
+              <div className="p-4 border-b bg-white flex items-center gap-3">
                 <button
-                  onClick={() => setSelectedUser(null)}
-                  className="p-2 mr-2 sm:hidden hover:bg-gray-100 rounded-full transition-colors"
+                  onClick={() => setSelectedUserId(null)}
+                  className="sm:hidden text-gray-600 text-xl"
                 >
-                  <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
+                  ←
                 </button>
-                <div className="flex items-center space-x-3 flex-1 min-w-0">
-                  <Image
-                    src={selectedUser.avatar}
-                    alt={selectedUser.name}
-                    width={48}
-                    height={48}
-                    className="rounded-full object-cover"
-                  />
-                  <div className="min-w-0">
-                    <div className="text-[16px] font-semibold text-[#32323E] truncate">{selectedUser.name}</div>
-                    <div className="flex items-center space-x-2 text-[12px] text-[#95959F]">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span>Online</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button className="px-4 py-2 bg-white border border-gray-200 text-black rounded-full text-[14px] font-medium whitespace-nowrap ml-2 hidden sm:inline-flex">
-                    View work details
-                  </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-full transition-colors hidden sm:block">
-                    <Phone className="h-4 w-4 text-gray-500" />
-                  </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-full transition-colors hidden sm:block">
-                    <Paperclip className="h-4 w-4 text-gray-500" />
-                  </button>
+                <Image
+                  src={
+                    // Try to get profile pic from conversations list if available
+                    conversations.find(c => c.participant.id === selectedUserId)?.participant.profilePic ||
+                    "/assets/images/person3.png"
+                  }
+                  alt="User"
+                  width={40}
+                  height={40}
+                  className="rounded-full object-cover"
+                />
+                <div>
+                  <p className="font-semibold">
+                    {
+                      conversations.find(c => c.participant.id === selectedUserId)?.participant.email.split("@")[0] ||
+                      "User"
+                    }
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {selectedConvo ? "Active now" : "Start a conversation"}
+                  </p>
                 </div>
               </div>
 
-              {/* Messages Container */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
-                  >
-                    <div
-                      className={`max-w-[70%] p-3 rounded-2xl ${
-                        message.isOwn
-                          ? 'bg-[#220084] text-white rounded-br-sm'
-                          : 'bg-white border border-gray-200 dark:border-gray-700 rounded-bl-sm'
-                      }`}
-                    >
-                      {message.type === 'text' ? (
-                        <p className="text-[14px] leading-relaxed">{message.content}</p>
-                      ) : (
-                        <div className="flex items-center space-x-2">
-                          <Paperclip className="h-4 w-4 text-[#220084]" />
-                          <span className="text-[12px] text-[#220084]">{message.fileName}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center justify-end mt-1 text-[11px] opacity-75">
-                        <span>{message.timestamp}</span>
-                        {message.isOwn && <div className="ml-1">✓✓</div>}
-                      </div>
+              {/* Messages Area */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                {loadingMessages ? (
+                  <p className="text-center text-gray-500">Loading...</p>
+                ) : messages.length === 0 ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 opacity-30" />
+                      <p className="text-gray-500 text-lg">No messages yet</p>
+                      <p className="text-sm text-gray-400 mt-2">Send a message to start the conversation</p>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  messages.map((msg: Message) => {
+                    const isOwn = msg.senderId === token?.split("|")[1]; // adjust if needed
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+                      >
+                        <div
+                          className={`max-w-xs px-4 py-2 rounded-2xl ${
+                            isOwn
+                              ? "bg-purple-600 text-white"
+                              : "bg-white border border-gray-200"
+                          }`}
+                        >
+                          {msg.text}
+                          <p className="text-xs opacity-70 mt-1">
+                            {new Date(msg.createdAt).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input Area */}
-              <div className="p-4 border-t border-[#DBDBE3] bg-white dark:bg-white">
-                <form onSubmit={handleSendMessage} className="flex items-end space-x-2">
-                  <div className="flex-1 relative">
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Type a message..."
-                      className="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] focus:outline-none focus:ring-2 focus:ring-[#220084] resize-none"
-                    />
-                    <button
-                      type="button"
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
-                    >
-                      <Smile className="h-5 w-5 text-gray-400" />
-                    </button>
-                  </div>
+              {/* Input Area - Always show when user is selected */}
+              <div className="p-4 border-t bg-white">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSend();
+                  }}
+                  className="flex gap-2"
+                >
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Type a message..."
+                    className="flex-1 px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  />
                   <button
                     type="submit"
-                    disabled={!newMessage.trim()}
-                    className={`p-3 rounded-full transition-all ${
-                      newMessage.trim()
-                        ? 'bg-[#220084] text-white hover:bg-purple-700'
-                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    }`}
+                    disabled={sendMutation.isPending || !newMessage.trim()}
+                    className="bg-purple-600 text-white p-3 rounded-full hover:bg-purple-700 disabled:opacity-50 transition"
                   >
                     <Send className="h-5 w-5" />
-                  </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                    <Paperclip className="h-4 w-4 text-gray-500" />
                   </button>
                 </form>
               </div>
             </>
           ) : (
-            // Empty state for desktop view
-            <div className="hidden sm:flex flex-1 flex-col items-center justify-center p-8 text-center">
-              <div className="w-16 h-16 bg-[#220084] rounded-full flex items-center justify-center mb-4">
-                <MessageCircle className="h-8 w-8 text-gray-400" />
+            // No user selected — show placeholder
+            <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50">
+              <div className="text-center">
+                <div className="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4" />
+                <p className="text-lg font-medium">No chat selected</p>
+                <p className="text-sm mt-2">Choose a conversation or start a new one</p>
               </div>
-              <h3 className="text-[18px] font-semibold text-[#32323E] mb-2">No chat selected</h3>
-              <p className="text-[14px] text-[#95959F]">Select a conversation to start messaging</p>
             </div>
           )}
         </div>
       </div>
     </div>
-    
   );
 };
 

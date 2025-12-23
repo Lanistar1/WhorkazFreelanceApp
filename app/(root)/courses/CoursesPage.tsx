@@ -3,72 +3,52 @@ import React, { useState } from "react";
 import Header from "@/components/Header";
 import Image from "next/image";
 import Link from "next/link";
-
-interface Course {
-  id: string;
-  title: string;
-  skillLevel: string;
-  duration: string;
-  price: string;
-  image: string;
-}
+import { useCourses, useMyCourses } from "@/app/actions/reactQuery"; // Adjust path as needed
+import type { Course } from "@/app/actions/type"; // Adjust path; assuming types are in type.ts or similar
 
 const CoursesPage = () => {
-  const popularCourses: Course[] = [
-    {
-      id: "1",
-      title: "Electrical Wiring Safety & Best Practices",
-      skillLevel: "Beginner",
-      duration: "45mins",
-      price: "₦25,000",
-      image: "/assets/images/electrician.png",
-    },
-    {
-      id: "2",
-      title: "Electrical Wiring Safety & Best Practices",
-      skillLevel: "Beginner",
-      duration: "45mins",
-      price: "₦25,000",
-      image: "/assets/images/electrician.png",
-    },
-    {
-      id: "3",
-      title: "Electrical Wiring Safety & Best Practices",
-      skillLevel: "Beginner",
-      duration: "45mins",
-      price: "₦25,000",
-      image: "/assets/images/electrician.png",
-    },
-  ];
-
-  const recommendedCourses: Course[] = [
-    {
-      id: "4",
-      title: "Electrical Wiring Safety & Best Practices",
-      skillLevel: "Beginner",
-      duration: "45mins",
-      price: "₦25,000",
-      image: "/assets/images/electrician.png",
-    },
-    {
-      id: "5",
-      title: "Electrical Wiring Safety & Best Practices",
-      skillLevel: "Beginner",
-      duration: "45mins",
-      price: "₦25,000",
-      image: "/assets/images/electrician.png",
-    },
-    {
-      id: "6",
-      title: "Electrical Wiring Safety & Best Practices",
-      skillLevel: "Beginner",
-      duration: "45mins",
-      price: "₦25,000",
-      image: "/assets/images/electrician.png",
-    },
-  ];
-
   const [activeTab, setActiveTab] = useState("Marketplace");
+  const [keyword, setKeyword] = useState("");
+  const [category, setCategory] = useState("");
+
+  // Fetch courses based on filters (for Marketplace tab)
+  const { data: coursesData, isLoading: isLoadingCourses } = useCourses({
+    keyword: keyword || undefined,
+    category: category || undefined,
+    // Add other filters as needed, e.g., isActive: true
+  });
+
+  const { data: myCoursesData, isLoading: isLoadingMyCourses } = useMyCourses({
+    keyword: keyword || undefined,
+    category: category || undefined,
+    // Add other filters as needed, e.g., isActive: true
+  });
+
+  const courses = coursesData?.courses || [];
+  const myCourses = myCoursesData?.courses || [];
+
+  const totalCount = coursesData?.count || 0;
+
+  // Derive popular courses: sorted by totalEnrollments descending
+  const popularCourses = [...courses]
+    .sort((a, b) => b.totalEnrollments - a.totalEnrollments)
+    .slice(0, 6); // Limit to top 6 or adjust as needed
+
+  // Derive recommended courses: sorted by averageRating descending
+  const recommendedCourses = [...courses]
+    .sort((a, b) => b.averageRating - a.averageRating)
+    .slice(0, 6); // Limit to top 6 or adjust as needed
+
+
+     // Derive popular courses for my courses: sorted by totalEnrollments descending
+  const popularMyCourses = [...myCourses]
+    .sort((a, b) => b.totalEnrollments - a.totalEnrollments)
+    .slice(0, 6); // Limit to top 6 or adjust as needed
+
+  // Derive recommended courses for my course: sorted by averageRating descending
+  const recommendedMyCourses = [...myCourses]
+    .sort((a, b) => b.averageRating - a.averageRating)
+    .slice(0, 6); // Limit to top 6 or adjust as needed
 
   const renderContent = () => {
     switch (activeTab) {
@@ -78,14 +58,20 @@ const CoursesPage = () => {
             {/* Popular Courses */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-[20px] font-semibold text-[#32323E]">Popular Courses</h2>
+                <h2 className="text-[20px] font-semibold text-[#32323E]">
+                  Popular Courses ({popularCourses.length})
+                </h2>
                 <div className="relative">
                   <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="appearance-none px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-300 rounded-[12px] text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors pr-8"
                   >
-                    <option value="all">All</option>
+                    <option value="">All</option>
                     <option value="electrical">Electrical</option>
                     <option value="plumbing">Plumbing</option>
+                    <option value="carpentry">Carpentry</option>
+                    {/* Add more categories as needed */}
                   </select>
                   <span className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                     <svg
@@ -105,82 +91,330 @@ const CoursesPage = () => {
                   </span>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {popularCourses.map((course) => (
-                <Link href={`/courses/${course.id}`} key={course.id}>
-                    <div
-                    key={course.id}
-                    className="bg-white dark:bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm"
-                  >
-                    <Image
-                      src={course.image}
-                      alt={course.title}
-                      width={400}
-                      height={200}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4">
-                      <h3 className="text-[16px] font-semibold text-[#32323E] mb-2">
-                        {course.title}
-                      </h3>
-                      <div className="flex justify-between items-center space-x-2 text-[14px] text-[#95959F] mb-2">
-                        <span>Skill Level: {course.skillLevel}</span>
-                        <span>{course.duration}</span>
+              {isLoadingCourses ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {Array(3)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-white border rounded-[12px] p-4 shadow-sm animate-pulse"
+                      >
+                        <div className="w-full h-48 bg-gray-300 rounded" />
+                        <div className="p-4 space-y-3">
+                          <div className="h-5 bg-gray-300 rounded w-3/4" />
+                          <div className="h-4 bg-gray-200 rounded w-1/2" />
+                          <div className="h-4 bg-gray-200 rounded w-1/3" />
+                        </div>
                       </div>
-                      <p className="text-[16px] font-semibold text-[#32323E]">
-                        {course.price}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-
-                  
-                ))}
-              </div>
+                    ))}
+                </div>
+              ) : popularCourses.length === 0 ? (
+                <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
+                  <div className="w-28 h-28 mx-auto mb-6 bg-gray-200 border-4 border-dashed rounded-xl" />
+                  <p className="text-xl font-semibold text-[#4B4B56]">No popular courses found</p>
+                  <p className="text-[#95959F] mt-3 max-w-md mx-auto">
+                    Try adjusting your search or check back later.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {popularCourses.map((course) => (
+                    <Link href={`/courses/${course.id}`} key={course.id}>
+                      <div className="bg-white dark:bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm">
+                        {/* <Image
+                          src={course.image}
+                          alt={course.title}
+                          width={400}
+                          height={200}
+                          className="w-full h-48 object-cover"
+                        /> */}
+                        <Image
+                          src={
+                            course.image && !course.image.includes("example.com")
+                              ? course.image
+                              : "/assets/images/electrician.png" // ← Create this file in public/assets/images/
+                          }
+                          alt={course.title}
+                          width={400}
+                          height={200}
+                          className="w-full h-48 object-cover"
+                          priority={false} // Optional: helps with LCP if you have many images
+                        />
+                        <div className="p-4">
+                          <h3 className="text-[16px] font-semibold text-[#32323E] mb-2">
+                            {course.title}
+                          </h3>
+                          <div className="flex justify-between items-center space-x-2 text-[14px] text-[#95959F] mb-2">
+                            <span>Skill Level: {course.level}</span>
+                            <span>{course.estimatedDuration}</span>
+                          </div>
+                          <p className="text-[16px] font-semibold text-[#32323E]">
+                            ₦{Number(course.price).toLocaleString()}
+                            {/* {course.price} */}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Recommended Courses */}
             <div>
               <h2 className="text-[20px] font-semibold text-[#32323E] mb-4">
-                Recommended Courses
+                Recommended Courses ({recommendedCourses.length})
               </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {recommendedCourses.map((course) => (
-                  <div
-                    key={course.id}
-                    className="bg-white dark:bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm"
-                  >
-                    <Image
-                      src={course.image}
-                      alt={course.title}
-                      width={400}
-                      height={200}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4">
-                      <h3 className="text-[16px] font-semibold text-[#32323E] mb-2">
-                        {course.title}
-                      </h3>
-                      <div className="flex justify-between items-center space-x-2 text-[14px] text-[#95959F] mb-2">
-                        <span>Skill Level: {course.skillLevel}</span>
-                        <span>{course.duration}</span>
+              {isLoadingCourses ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {Array(3)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-white border rounded-[12px] p-4 shadow-sm animate-pulse"
+                      >
+                        <div className="w-full h-48 bg-gray-300 rounded" />
+                        <div className="p-4 space-y-3">
+                          <div className="h-5 bg-gray-300 rounded w-3/4" />
+                          <div className="h-4 bg-gray-200 rounded w-1/2" />
+                          <div className="h-4 bg-gray-200 rounded w-1/3" />
+                        </div>
                       </div>
-                      <p className="text-[16px] font-semibold text-[#32323E]">
-                        {course.price}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    ))}
+                </div>
+              ) : recommendedCourses.length === 0 ? (
+                <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
+                  <div className="w-28 h-28 mx-auto mb-6 bg-gray-200 border-4 border-dashed rounded-xl" />
+                  <p className="text-xl font-semibold text-[#4B4B56]">No recommended courses found</p>
+                  <p className="text-[#95959F] mt-3 max-w-md mx-auto">
+                    Try adjusting your search or check back later.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {recommendedCourses.map((course) => (
+                    <Link href={`/courses/${course.id}`} key={course.id}>
+                      <div className="bg-white dark:bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm">
+                        
+                        <Image
+                          src={
+                            course.image && !course.image.includes("example.com")
+                              ? course.image
+                              : "/assets/images/electrician.png" // ← Create this file in public/assets/images/
+                          }
+                          alt={course.title}
+                          width={400}
+                          height={200}
+                          className="w-full h-48 object-cover"
+                          priority={false} // Optional: helps with LCP if you have many images
+                        />
+                        <div className="p-4">
+                          <h3 className="text-[16px] font-semibold text-[#32323E] mb-2">
+                            {course.title}
+                          </h3>
+                          <div className="flex justify-between items-center space-x-2 text-[14px] text-[#95959F] mb-2">
+                            <span>Skill Level: {course.level}</span>
+                            <span>{course.estimatedDuration}</span>
+                          </div>
+                          <p className="text-[16px] font-semibold text-[#32323E]">
+                            ₦{Number(course.price).toLocaleString()}
+                            {/* {course.price} */}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           </>
         );
       case "Paid courses":
-      case "Posted Courses":
         return (
           <div className="text-center py-12">
             <h3 className="text-[18px] font-semibold text-[#32323E]">Nothing to show here</h3>
           </div>
+        );
+      case "Posted Courses":
+        return (
+          <>
+            {/* Popular Courses */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-[20px] font-semibold text-[#32323E]">
+                  Popular Courses ({popularMyCourses.length})
+                </h2>
+                <div className="relative">
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="appearance-none px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-300 rounded-[12px] text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors pr-8"
+                  >
+                    <option value="">All</option>
+                    <option value="electrical">Electrical</option>
+                    <option value="plumbing">Plumbing</option>
+                    <option value="carpentry">Carpentry</option>
+                    {/* Add more categories as needed */}
+                  </select>
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-gray-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+              {isLoadingMyCourses ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {Array(3)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-white border rounded-[12px] p-4 shadow-sm animate-pulse"
+                      >
+                        <div className="w-full h-48 bg-gray-300 rounded" />
+                        <div className="p-4 space-y-3">
+                          <div className="h-5 bg-gray-300 rounded w-3/4" />
+                          <div className="h-4 bg-gray-200 rounded w-1/2" />
+                          <div className="h-4 bg-gray-200 rounded w-1/3" />
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : popularMyCourses.length === 0 ? (
+                <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
+                  <div className="w-28 h-28 mx-auto mb-6 bg-gray-200 border-4 border-dashed rounded-xl" />
+                  <p className="text-xl font-semibold text-[#4B4B56]">No popular courses found</p>
+                  <p className="text-[#95959F] mt-3 max-w-md mx-auto">
+                    Try adjusting your search or check back later.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {popularMyCourses.map((course) => (
+                    <Link href={`/courses/${course.id}`} key={course.id}>
+                      <div className="bg-white dark:bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm">
+                        {/* <Image
+                          src={course.image}
+                          alt={course.title}
+                          width={400}
+                          height={200}
+                          className="w-full h-48 object-cover"
+                        /> */}
+                        <Image
+                          src={
+                            course.image && !course.image.includes("example.com")
+                              ? course.image
+                              : "/assets/images/electrician.png" // ← Create this file in public/assets/images/
+                          }
+                          alt={course.title}
+                          width={400}
+                          height={200}
+                          className="w-full h-48 object-cover"
+                          priority={false} // Optional: helps with LCP if you have many images
+                        />
+                        <div className="p-4">
+                          <h3 className="text-[16px] font-semibold text-[#32323E] mb-2">
+                            {course.title}
+                          </h3>
+                          <div className="flex justify-between items-center space-x-2 text-[14px] text-[#95959F] mb-2">
+                            <span>Skill Level: {course.level}</span>
+                            <span>{course.estimatedDuration}</span>
+                          </div>
+                          <p className="text-[16px] font-semibold text-[#32323E]">
+                            ₦{Number(course.price).toLocaleString()}
+                            {/* {course.price} */}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Recommended Courses */}
+            <div>
+              <h2 className="text-[20px] font-semibold text-[#32323E] mb-4">
+                Recommended Courses ({recommendedMyCourses.length})
+              </h2>
+              {isLoadingMyCourses ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {Array(3)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-white border rounded-[12px] p-4 shadow-sm animate-pulse"
+                      >
+                        <div className="w-full h-48 bg-gray-300 rounded" />
+                        <div className="p-4 space-y-3">
+                          <div className="h-5 bg-gray-300 rounded w-3/4" />
+                          <div className="h-4 bg-gray-200 rounded w-1/2" />
+                          <div className="h-4 bg-gray-200 rounded w-1/3" />
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ) : recommendedMyCourses.length === 0 ? (
+                <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
+                  <div className="w-28 h-28 mx-auto mb-6 bg-gray-200 border-4 border-dashed rounded-xl" />
+                  <p className="text-xl font-semibold text-[#4B4B56]">No recommended courses found</p>
+                  <p className="text-[#95959F] mt-3 max-w-md mx-auto">
+                    Try adjusting your search or check back later.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                  {recommendedMyCourses.map((course) => (
+                    <Link href={`/courses/${course.id}`} key={course.id}>
+                      <div className="bg-white dark:bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm">
+                        
+                        <Image
+                          src={
+                            course.image && !course.image.includes("example.com")
+                              ? course.image
+                              : "/assets/images/electrician.png" // ← Create this file in public/assets/images/
+                          }
+                          alt={course.title}
+                          width={400}
+                          height={200}
+                          className="w-full h-48 object-cover"
+                          priority={false} // Optional: helps with LCP if you have many images
+                        />
+                        <div className="p-4">
+                          <h3 className="text-[16px] font-semibold text-[#32323E] mb-2">
+                            {course.title}
+                          </h3>
+                          <div className="flex justify-between items-center space-x-2 text-[14px] text-[#95959F] mb-2">
+                            <span>Skill Level: {course.level}</span>
+                            <span>{course.estimatedDuration}</span>
+                          </div>
+                          <p className="text-[16px] font-semibold text-[#32323E]">
+                            ₦{Number(course.price).toLocaleString()}
+                            {/* {course.price} */}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
         );
       default:
         return null;
@@ -200,11 +434,10 @@ const CoursesPage = () => {
             Grow Your Career.
           </h1>
           <Link href="/courses/new-course">
-            <button className="px-4 md:px-6 py-3 bg-[#3900DC] text-white rounded-full text-[12px] md:text-[16px] font-medium hover:bg-purple-700 transition-colors">
+            <button className="px-4 md:px-6 py-3 bg-[#3900DC] text-white rounded-full text-[12px] md:text-[16px] font-medium hover:bg-purple-700 transition-colors cursor-pointer">
               + Create new course
             </button>
           </Link>
-          
         </div>
 
         {/* Tabs */}
@@ -231,44 +464,50 @@ const CoursesPage = () => {
 
         {/* Search Bar */}
         <div className="relative mb-8">
-        <Image
+          <Image
             src="/assets/icons/searchIcon.png" // Replace with actual search icon path
             alt="Search"
             width={18}
             height={18}
             className="absolute left-3 top-1/2 transform -translate-y-1/2 object-contain"
-        />
-        <input
+          />
+          <input
             type="text"
             placeholder="What do you want to learn?"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
             className="w-full pl-10 pr-12 py-3 border border-gray-300 dark:border-gray-300 rounded-[12px] text-[16px] font-medium text-[#4B4B56] dark:text-[#4B4B56] focus:outline-none focus:ring-2 focus:ring-purple-500"
-        />
-        <div className="absolute right-30 top-1/2 transform -translate-y-1/2 h-6 border-l border-[#3900DC]"></div>
-        <div className="absolute right-0 top-0 h-full w-[100px] flex items-center pr-3">
+          />
+          <div className="absolute right-30 top-1/2 transform -translate-y-1/2 h-6 border-l border-[#3900DC]"></div>
+          <div className="absolute right-0 top-0 h-full w-[100px] flex items-center pr-3">
             <select
-            className="appearance-none w-full py-2 bg-transparent text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="appearance-none w-full py-2 bg-transparent text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors"
             >
-            <option value="electrical">Electrical</option>
-            <option value="plumbing">Plumbing</option>
-            <option value="carpentry">Carpentry</option>
+              <option value="">All</option>
+              <option value="electrical">Electrical</option>
+              <option value="plumbing">Plumbing</option>
+              <option value="carpentry">Carpentry</option>
+              {/* Add more categories as needed */}
             </select>
             <span className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-            <svg
+              <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-4 w-4 text-gray-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
-            >
+              >
                 <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
                 />
-            </svg>
+              </svg>
             </span>
-        </div>
+          </div>
         </div>
 
         {renderContent()}
