@@ -33,14 +33,6 @@ export type createUser = {
 
 //====== user profile type =============
 // types/user.ts
-export interface NotificationPreferences {
-  payments: { push: boolean; email: boolean };
-  newMessages: { push: boolean; email: boolean };
-  announcements: { push: boolean; email: boolean };
-  accountActivity: { push: boolean; email: boolean };
-  jobStatusUpdates: { push: boolean; email: boolean };
-}
-
 export interface ClientProfile {
   id: string;
   clientType: "individual" | "business";
@@ -59,15 +51,22 @@ export interface UserProfile {
   id: string;
   email: string;
   phoneNumber: string | null;
+  firstName: string | null; // Top level can be null
+  lastName: string | null;  // Top level can be null
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
+  kycVerificationStatus: "pending" | "verified" | "rejected" | null;
+  kycType: string | null;
   profilePic: string | null;
   userType: "client" | "workman";
   status: string;
-  notificationPreferences: NotificationPreferences;
+  notificationPreferences: any; // You can keep your specific interface here
   createdAt: string;
+  updatedAt: string;
   client: ClientProfile | null;
   workman: any | null;
+  paymentMethods: any[];
+  bankAccounts: any[];
 }
 
 export type userProfile = {
@@ -502,5 +501,129 @@ export interface CourseDetailResponse {
   message: string;
   data: {
     course: CourseDetail;
+  };
+}
+
+
+
+// =========== initiate payment ==========
+type PaymentContextType = "course" | "job" | "marketplace";
+type PaymentProvider = "paystack" | "flutterwave";
+
+export type initiatePaymentPayload = {
+  _amount?: number | string; // optional (for testing or override from context)
+
+  // Optional Context (What is this payment for?)
+  contextType?: PaymentContextType;
+  contextId?: string;
+  contextQuantity?: number;
+
+  // Optional Provider (Defaults to Paystack if omitted)
+  provider?: PaymentProvider;
+  savePaymentMethod?: boolean;
+
+  // Optional Callback (Highest priority)
+  _callbackUrl?: string;
+}
+
+export type verifyPaymentType = {
+  reference?: string;
+  provider?: number;
+}
+
+export type verifyBankFlutterwaveType = {
+  accountNumber?: string;
+  bankCode?: number;
+  "provider": "flutterwave"
+}
+
+export type verifyBankPaystackType = {
+  accountNumber?: string;
+  bankCode?: number;
+  "provider": "paystack"
+}
+
+
+type Currency = "NGN" | "USD" | "GBP" | "EUR";
+type ContextType = "subscription" | "course" | "job" | "marketplace";
+
+export type SubscriptionPaymentPayload = {
+  email: string | undefined;
+  amount: number;
+  currency: Currency;
+
+  contextType: ContextType;
+  contextId: string;
+
+  savePaymentMethod?: boolean;
+
+  _callbackUrl?: string;
+
+  metadata?: {
+    autoRenew?: boolean;
+    [key: string]: any;
+  };
+}
+
+
+export interface subscribePayload {
+  contextType: ContextType;
+  contextId: string;
+
+  provider?: PaymentProvider;
+  savePaymentMethod?: boolean;
+
+  metadata?: {
+    autoRenew?: boolean;
+    [key: string]: any;
+  };
+
+  _callbackUrl?: string;
+}
+
+
+// ========== verify KYC ===============
+export type VerifyKycType = {
+  fullName: string;
+  idNumber: string;
+  idPicture: string;
+  kycType: "bvn" | "nin" | "passport";
+};
+
+
+// ========== fetch Enrollment course type ===============
+export interface Enrollment {
+  id: string;
+  courseId: string;
+  userId: string;
+  status: string;
+  progress: number;
+  lessonProgress: any | null;
+  completedAt: string | null;
+  certificateUrl: string | null;
+  isCertificateGenerated: boolean;
+  paymentId: string;
+  createdAt: string;
+  updatedAt: string;
+  course: Course;
+  payment: {
+    id: string;
+    reference: string;
+    provider: string;
+    contextType: string;
+    amount: string;
+    status: string;
+    paidAt: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface EnrolledCoursesResponse {
+  success: boolean;
+  message: string;
+  data: {
+    enrollments: Enrollment[];
+    count: number;
   };
 }

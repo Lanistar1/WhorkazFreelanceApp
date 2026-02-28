@@ -3,13 +3,57 @@ import React, { useState } from "react";
 import Header from "@/components/Header";
 import Image from "next/image";
 import Link from "next/link";
-import { useCourses, useMyCourses } from "@/app/actions/reactQuery"; // Adjust path as needed
-import type { Course } from "@/app/actions/type"; // Adjust path; assuming types are in type.ts or similar
+import { useCourses, useMyCourses, useMyEnrolledCourses } from "@/app/actions/reactQuery"; 
+import DeleteConfirmationModal from '@/components/DeleteConfirmationModal'; 
+import { Trash2 } from 'lucide-react'; 
+import axios from "axios";
+import { useAuth } from "@/app/context/AuthContext";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+
+
 
 const CoursesPage = () => {
+  const { token } = useAuth();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("Marketplace");
   const [keyword, setKeyword] = useState("");
   const [category, setCategory] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
+
+
+  const handleDeleteClick = (courseId: string) => {
+    setCourseToDelete(courseId);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!courseToDelete) return;
+
+    try {
+      await axios.delete(`${apiUrl}/api/v1/courses/${courseToDelete}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Force immediate refresh
+      // queryClient.invalidateQueries({ queryKey: ['my-courses'] });
+      // queryClient.refetchQueries({ queryKey: ['my-courses'] });
+
+      setShowDeleteModal(false);
+      setCourseToDelete(null);
+
+      toast.success("Course deleted successfully");
+
+      //====== reload window after deleting ======
+      window.location.reload();
+
+    } catch (error) {
+      console.error("Delete failed:", error);
+      toast.error("Failed to delete course");
+    }
+  };
 
   // Fetch courses based on filters (for Marketplace tab)
   const { data: coursesData, isLoading: isLoadingCourses } = useCourses({
@@ -24,8 +68,17 @@ const CoursesPage = () => {
     // Add other filters as needed, e.g., isActive: true
   });
 
+  const { data: enrolledCoursesData, isLoading: isLoadingEnrolled } = useMyEnrolledCourses({
+    keyword: keyword || undefined,
+    category: category || undefined,
+  });
+
+
   const courses = coursesData?.courses || [];
   const myCourses = myCoursesData?.courses || [];
+  // const enrolledCourses = enrolledCoursesData?.courses || [];
+const enrolledCourses = enrolledCoursesData?.enrollments?.map((e) => e.course) || [];
+
 
   const totalCount = coursesData?.count || 0;
 
@@ -49,6 +102,9 @@ const CoursesPage = () => {
   const recommendedMyCourses = [...myCourses]
     .sort((a, b) => b.averageRating - a.averageRating)
     .slice(0, 6); // Limit to top 6 or adjust as needed
+
+
+
 
   const renderContent = () => {
     switch (activeTab) {
@@ -231,12 +287,74 @@ const CoursesPage = () => {
             </div>
           </>
         );
+      // case "Paid courses":
+      //   return (
+      //     <div className="text-center py-12">
+      //       <h3 className="text-[18px] font-semibold text-[#32323E]">Nothing to show here</h3>
+      //     </div>
+      //   );
       case "Paid courses":
-        return (
-          <div className="text-center py-12">
-            <h3 className="text-[18px] font-semibold text-[#32323E]">Nothing to show here</h3>
-          </div>
-        );
+      return isLoadingEnrolled ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {Array(3)
+            .fill(0)
+            .map((_, i) => (
+              <div
+                key={i}
+                className="bg-white border rounded-[12px] p-4 shadow-sm animate-pulse"
+              >
+                <div className="w-full h-48 bg-gray-300 rounded" />
+                <div className="p-4 space-y-3">
+                  <div className="h-5 bg-gray-300 rounded w-3/4" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                  <div className="h-4 bg-gray-200 rounded w-1/3" />
+                </div>
+              </div>
+            ))}
+        </div>
+      ) : enrolledCourses.length === 0 ? (
+        <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
+          <div className="w-28 h-28 mx-auto mb-6 bg-gray-200 border-4 border-dashed rounded-xl" />
+          <p className="text-xl font-semibold text-[#4B4B56]">No enrolled courses found</p>
+          <p className="text-[#95959F] mt-3 max-w-md mx-auto">
+            You haven’t enrolled in any courses yet. Explore the marketplace to start learning.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {enrolledCourses.map((course) => (
+            <Link href={`/courses/${course.id}`} key={course.id}>
+              <div className="bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm">
+                <Image
+                  src={
+                    course.image && !course.image.includes("example.com")
+                      ? course.image
+                      : "/assets/images/electrician.png"
+                  }
+                  alt={course.title}
+                  width={400}
+                  height={200}
+                  className="w-full h-48 object-cover"
+                  priority={false}
+                />
+                <div className="p-4">
+                  <h3 className="text-[16px] font-semibold text-[#32323E] mb-2">
+                    {course.title}
+                  </h3>
+                  <div className="flex justify-between items-center space-x-2 text-[14px] text-[#95959F] mb-2">
+                    <span>Skill Level: {course.level}</span>
+                    <span>{course.estimatedDuration}</span>
+                  </div>
+                  <p className="text-[16px] font-semibold text-[#32323E]">
+                    ₦{Number(course.price).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      );
+
       case "Posted Courses":
         return (
           <>
@@ -244,7 +362,7 @@ const CoursesPage = () => {
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-[20px] font-semibold text-[#32323E]">
-                  Popular Courses ({popularMyCourses.length})
+                  Courses ({popularMyCourses.length})
                 </h2>
                 <div className="relative">
                   <select
@@ -305,111 +423,48 @@ const CoursesPage = () => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                   {popularMyCourses.map((course) => (
-                    <Link href={`/courses/${course.id}`} key={course.id}>
-                      <div className="bg-white dark:bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm">
-                        {/* <Image
-                          src={course.image}
-                          alt={course.title}
-                          width={400}
-                          height={200}
-                          className="w-full h-48 object-cover"
-                        /> */}
-                        <Image
-                          src={
-                            course.image && !course.image.includes("example.com")
-                              ? course.image
-                              : "/assets/images/electrician.png" // ← Create this file in public/assets/images/
-                          }
-                          alt={course.title}
-                          width={400}
-                          height={200}
-                          className="w-full h-48 object-cover"
-                          priority={false} // Optional: helps with LCP if you have many images
-                        />
-                        <div className="p-4">
-                          <h3 className="text-[16px] font-semibold text-[#32323E] mb-2">
-                            {course.title}
-                          </h3>
-                          <div className="flex justify-between items-center space-x-2 text-[14px] text-[#95959F] mb-2">
-                            <span>Skill Level: {course.level}</span>
-                            <span>{course.estimatedDuration}</span>
+                    <div key={course.id} className="relative"> {/* ← Key goes here */}
+                      <Link href={`/courses/${course.id}`}>
+                        <div className="bg-white dark:bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm">
+                          <Image
+                            src={
+                              course.image && !course.image.includes("example.com")
+                                ? course.image
+                                : "/assets/images/electrician.png"
+                            }
+                            alt={course.title}
+                            width={400}
+                            height={200}
+                            className="w-full h-48 object-cover"
+                            priority={false}
+                          />
+                          <div className="p-4">
+                            <h3 className="text-[16px] font-semibold text-[#32323E] mb-2">
+                              {course.title}
+                            </h3>
+                            <div className="flex justify-between items-center space-x-2 text-[14px] text-[#95959F] mb-2">
+                              <span>Skill Level: {course.level}</span>
+                              <span>{course.estimatedDuration}</span>
+                            </div>
+                            <p className="text-[16px] font-semibold text-[#32323E]">
+                              ₦{Number(course.price).toLocaleString()}
+                            </p>
                           </div>
-                          <p className="text-[16px] font-semibold text-[#32323E]">
-                            ₦{Number(course.price).toLocaleString()}
-                            {/* {course.price} */}
-                          </p>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+                      </Link>
 
-            {/* Recommended Courses */}
-            <div>
-              <h2 className="text-[20px] font-semibold text-[#32323E] mb-4">
-                Recommended Courses ({recommendedMyCourses.length})
-              </h2>
-              {isLoadingMyCourses ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {Array(3)
-                    .fill(0)
-                    .map((_, i) => (
-                      <div
-                        key={i}
-                        className="bg-white border rounded-[12px] p-4 shadow-sm animate-pulse"
+                      {/* Delete Icon */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDeleteClick(course.id);
+                        }}
+                        className="absolute bottom-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors cursor-pointer"
+                        aria-label="Delete course"
                       >
-                        <div className="w-full h-48 bg-gray-300 rounded" />
-                        <div className="p-4 space-y-3">
-                          <div className="h-5 bg-gray-300 rounded w-3/4" />
-                          <div className="h-4 bg-gray-200 rounded w-1/2" />
-                          <div className="h-4 bg-gray-200 rounded w-1/3" />
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              ) : recommendedMyCourses.length === 0 ? (
-                <div className="text-center py-16 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-300">
-                  <div className="w-28 h-28 mx-auto mb-6 bg-gray-200 border-4 border-dashed rounded-xl" />
-                  <p className="text-xl font-semibold text-[#4B4B56]">No recommended courses found</p>
-                  <p className="text-[#95959F] mt-3 max-w-md mx-auto">
-                    Try adjusting your search or check back later.
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                  {recommendedMyCourses.map((course) => (
-                    <Link href={`/courses/${course.id}`} key={course.id}>
-                      <div className="bg-white dark:bg-white border border-[#DBDBE3] rounded-[12px] overflow-hidden shadow-sm">
-                        
-                        <Image
-                          src={
-                            course.image && !course.image.includes("example.com")
-                              ? course.image
-                              : "/assets/images/electrician.png" // ← Create this file in public/assets/images/
-                          }
-                          alt={course.title}
-                          width={400}
-                          height={200}
-                          className="w-full h-48 object-cover"
-                          priority={false} // Optional: helps with LCP if you have many images
-                        />
-                        <div className="p-4">
-                          <h3 className="text-[16px] font-semibold text-[#32323E] mb-2">
-                            {course.title}
-                          </h3>
-                          <div className="flex justify-between items-center space-x-2 text-[14px] text-[#95959F] mb-2">
-                            <span>Skill Level: {course.level}</span>
-                            <span>{course.estimatedDuration}</span>
-                          </div>
-                          <p className="text-[16px] font-semibold text-[#32323E]">
-                            ₦{Number(course.price).toLocaleString()}
-                            {/* {course.price} */}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
+                        <Trash2 className="w-5 h-5 text-red-600" />
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -512,6 +567,17 @@ const CoursesPage = () => {
 
         {renderContent()}
       </main>
+
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setCourseToDelete(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Delete Course"
+        message="Are you sure you want to delete this course? This action cannot be undone."
+      />
     </div>
   );
 };

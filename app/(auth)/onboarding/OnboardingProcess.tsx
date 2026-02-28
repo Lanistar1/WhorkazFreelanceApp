@@ -945,7 +945,7 @@ const OnboardingProcess = () => {
                 </div>
 
                 <div className="mb-6">
-                  <label className="text-[16px] text-[#4B4B56] mb-2 block">Upload media</label>
+                  <label className="text-[16px] text-[#4B4B56] mb-2 block">Upload media (Compulsory)</label>
                   <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-[#E5E5E9] rounded-lg bg-white cursor-pointer hover:bg-[#F9F9FB]">
                     <input
                       type="file"
@@ -954,6 +954,7 @@ const OnboardingProcess = () => {
                       className="hidden"
                       id="mediaUpload"
                       onChange={handleMediaChange}
+                      required
                     />
                     <label htmlFor="mediaUpload" className="flex flex-col items-center cursor-pointer">
                       <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#F1F1F5] text-[#3900DC] mb-2">
@@ -976,13 +977,13 @@ const OnboardingProcess = () => {
                   )}
                 </div>
 
-                <div className="flex flex-row justify-between gap-4 mt-10">
-                  <button
+                <div className="flex flex-row justify-between gap-4 mt-10 ml-auto">
+                  {/* <button
                     onClick={handleSkipForNow}
                     className="text-[14px] px-6 py-3 border border-[#E5E5E9] rounded-full text-[#4B4B56] hover:bg-[#F9F9FB] transition-colors"
                   >
                     Skip for now
-                  </button>
+                  </button> */}
                   <CustomButton
                     title={isLoading ? "Uploading..." : "Upload project"}
                     onClick={handleUploadProject}

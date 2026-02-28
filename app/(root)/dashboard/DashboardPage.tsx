@@ -1,11 +1,54 @@
-
-import React from "react";
+'use client'
+import React, { useEffect } from "react";
 //import { Bell, MessageSquare, Wallet } from "lucide-react";
 import Image from "next/image";
 import Header from "@/components/Header";
 import Link from "next/link";
+import { useUser } from "@/app/actions/reactQuery";
+
 
 const DashboardPage = () => {
+
+  const { data, isLoading, isError } = useUser();
+  const user = data?.user;
+
+  useEffect(() => {
+    if (user?.kycVerificationStatus) {
+      // Save specifically for use on other pages
+      localStorage.setItem("userKycStatus", user.kycVerificationStatus);
+      console.log("my KYC status", user.kycVerificationStatus)
+    }
+  }, [user]); 
+  // Default fallback
+  const fullName = user?.client?.clientType === "individual"
+    ? `${user.client.firstName || ""} ${user.client.lastName || ""}`.trim() || "N/A"
+    : user?.client?.companyName || "User";
+
+  const profilePhoto = user?.client?.photo || "/assets/images/person3.png";
+  const phoneVerified = user?.isPhoneVerified;
+  const emailVerified = user?.isEmailVerified;
+
+  // Profile completion percentage (example logic)
+  const completionItems = [
+    user?.client?.photo !== null,
+    phoneVerified,
+    emailVerified,
+    true, // payments (you can track this later)
+    false // KYC (null means not started)
+  ];
+  const completedCount = completionItems.filter(Boolean).length;
+  const completionPercent = (completedCount / 5) * 100;
+
+  
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#3900DC] border-t-transparent"></div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="min-h-screen w-full bg-white dark:bg-white text-gray-900 dark:text-gray-900">
@@ -21,6 +64,9 @@ const DashboardPage = () => {
             <div className="flex space-x-4">
               <Link href='/explore'>
                 <button className="bg-[#3900DC] text-white px-4 py-2 rounded-full font-medium hover:bg-purple-700 transition-colors">Find your next  job </button>
+              </Link>
+              <Link href="/dashboard/verify-kyc">
+                <button className="bg-white dark:bg-white text-gray-900 dark:text-gray-900 px-4 py-2 rounded-full font-medium border border-gray-300 dark:border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors cursor-pointer">Verify KYC</button>
               </Link>
             </div>
           </div>
@@ -108,7 +154,8 @@ const DashboardPage = () => {
                   className="object-contain"
                 />
                 <div>
-                  <p className="font-medium">Jason Alexander</p>
+                  {/* <p className="font-medium">Jason Alexander</p> */}
+                  <p className="font-medium">{fullName}</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500">Workaz Client</p>
                 </div>
               </div>
@@ -116,33 +163,48 @@ const DashboardPage = () => {
               <div className="w-full bg-gray-200 dark:bg-gray-200 rounded-full h-2 mb-2 mt-4">
                 <div className="bg-[#3900DC] h-2 rounded-full" style={{ width: "20%" }}></div>
               </div>
-              <div className="mt-8">
-                <p className="text-[16px] font-semibold text-[#95959F] dark:text-[#95959F]">
-                  Actionable insights
-                </p>
-                <ul className="space-y-5 text-sm mt-4">
-                  <li className="flex items-center space-x-2">
-                    <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-300"></div>
-                    <span>Verify your phone number</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-300"></div>
-                    <span>Set up payments</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-300"></div>
-                    <span>Post your first job</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-300"></div>
-                    <span>KYC verification</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <div className="h-4 w-4 bg-[#3900DC] rounded-full"></div>
-                    <span>Add your profile picture</span>
-                  </li>
-                </ul>
-              </div>
+               <div className="mt-8">
+              <p className="text-[16px] font-semibold text-[#95959F]">Actionable insights</p>
+              <ul className="space-y-5 text-sm mt-4">
+                {/* Phone Verification */}
+                <li className="flex items-center space-x-2">
+                  <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${user?.isPhoneVerified ? "bg-[#3900DC] border-[#3900DC]" : "border-gray-300"}`}>
+                    {user?.isPhoneVerified && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                  </div>
+                  <span>Verify your phone number</span>
+                </li>
+
+                {/* Payments Setup - Checking if bankAccounts array has items */}
+                <li className="flex items-center space-x-2">
+                  <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${user?.bankAccounts && user.bankAccounts.length > 0 ? "bg-[#3900DC] border-[#3900DC]" : "border-gray-300"}`}>
+                    {user?.bankAccounts && user.bankAccounts.length > 0 && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                  </div>
+                  <span>Set up payments</span>
+                </li>
+
+                {/* Post Job - Manual/Placeholder for now */}
+                <li className="flex items-center space-x-2">
+                  <div className="h-4 w-4 rounded-full border border-gray-300"></div>
+                  <span>Post your first job</span>
+                </li>
+
+                {/* KYC Verification - Checking for 'verified' status */}
+                <li className="flex items-center space-x-2">
+                  <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${user?.kycVerificationStatus === "verified" ? "bg-[#3900DC] border-[#3900DC]" : "border-gray-300"}`}>
+                    {user?.kycVerificationStatus === "verified" && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                  </div>
+                  <span>KYC verification</span>
+                </li>
+
+                {/* Profile Picture */}
+                <li className="flex items-center space-x-2">
+                  <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${user?.client?.photo ? "bg-[#3900DC] border-[#3900DC]" : "border-gray-300"}`}>
+                    {user?.client?.photo && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                  </div>
+                  <span>Added profile picture</span>
+                </li>
+              </ul>
+            </div>
             </div>
           </div>
         </main>

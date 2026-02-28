@@ -79,6 +79,7 @@ export const Navbar = () => {
         { name: 'Apprenticeship', icon: <CoursesIcon />, link: '/courses' },
         { name: 'Messages', icon: <MessagesIcon />, link: '/messages' },
         { name: 'Payments', icon: <PaymentsIcon />, link: '/payments' },
+        { name: 'Subscription', icon: <PaymentsIcon />, link: '/plans' },
         { name: 'Settings', icon: <SettingsIcon />, link: '/settings' },
     ];
 
