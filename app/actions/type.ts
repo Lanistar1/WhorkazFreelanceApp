@@ -75,7 +75,7 @@ export type userProfile = {
 
 
 //==========start of workers onboarding requestBody type ============
-export interface Service {
+export interface OnboardingService {
   serviceId: string | null;
   customServiceName: string;
 }
@@ -100,7 +100,7 @@ export interface PastWork {
 }
 
 export interface WorkmanOnboardingPayload {
-  services: Service[];
+  services: OnboardingService[];
   experience: Experience;
   pastWorks: PastWork[];
 }
