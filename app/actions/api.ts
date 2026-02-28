@@ -1,5 +1,5 @@
 import axios from "axios";
-import {  ConversationMessagesResponse, ConversationsResponse, CourseDetail, CourseDetailResponse, CoursesResponse, CreateOnlineCoursePayload, CreatePhysicalCoursePayload, createUser,  JobFromAPI,  JobsResponse,  LoginCredentials, LoginResponse, SendMessageRequest, SendMessageResponse, Service, userProfile, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
+import {  ConversationMessagesResponse, ConversationsResponse, CourseDetail, CourseDetailResponse, CoursesResponse, CreateOnlineCoursePayload, CreatePhysicalCoursePayload, createUser,  EnrolledCoursesResponse,  initiatePaymentPayload,  JobFromAPI,  JobsResponse,  LoginCredentials, LoginResponse, SendMessageRequest, SendMessageResponse, Service, subscribePayload, SubscriptionPaymentPayload, userProfile, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
 
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -253,4 +253,176 @@ export const fetchMyCourses = async (
   });
 
   return response.data.data;
+};
+
+// =========Get my enrolled courses ========
+export const fetchMyEnrolledCourses = async (
+  token: string,
+  params?: {
+    category?: string;
+    level?: string;
+    classType?: string;
+    workmanId?: string;
+    keyword?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    isActive?: boolean;
+  }
+): Promise<EnrolledCoursesResponse["data"]> => {
+  if (!token) throw new Error("Authentication required");
+
+  const response = await axios.get(`${apiUrl}/api/v1/courses/enrollments/my-enrollments`, {
+    params,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data.data;
+};
+
+
+
+
+//=====fetching payment list ========
+export const fetchPaymentList = async (token: string): Promise<userProfile> => {
+  const response = await axios.get(`${apiUrl}/api/v1/payments/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data.data; 
+};
+
+//=====fetching bank list ========
+export const fetchBankList = async (token: string): Promise<userProfile> => {
+  const response = await axios.get(`${apiUrl}/api/v1/payments/banks?`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data.data; 
+};
+
+//======== initiate payment ================
+export const initiatePayment = async (data: initiatePaymentPayload, token: string | null) => {
+  const res = await axios.post(`${apiUrl}/api/v1/payments/initialize`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return res.data;
+};
+
+//======== verify payment ================
+export const verifyPayment = async (data: verifyPaymentType, token: string | null) => {
+  const res = await axios.post(`${apiUrl}/api/v1/payments/initialize`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return res.data;
+};
+
+//======== verify bank ================
+export const verifyBank = async (data: verifyBankFlutterwaveType, token: string | null) => {
+  const res = await axios.post(`${apiUrl}/api/v1/payments/initialize`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return res.data;
+};
+
+//======== initiate sucscription ================
+export const initiateSubscription = async (data: SubscriptionPaymentPayload, token: string | null) => {
+  const res = await axios.post(`${apiUrl}/api/v1/payments/initialize`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return res.data;
+};
+
+
+//=====fetching subscription list ========
+export const fetchSubscriptionList = async (token: string): Promise<userProfile> => {
+  const response = await axios.get(`${apiUrl}/api/v1/subscriptions/plans/`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data.data; 
+};
+
+//=====fetching my subscription list ========
+export const fetchMyubscriptionList = async (token: string) => {
+  const response = await axios.get(`${apiUrl}/api/v1/subscriptions/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = response.data.data;
+
+  if (!data) return [];
+
+  return [
+    {
+      ...data.plan,          // normalize into same shape as plans list
+      subscription: {
+        id: data.id,
+        status: data.status,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        nextBillingDate: data.nextBillingDate,
+        autoRenew: data.autoRenew,
+      },
+    },
+  ];
+};
+
+//======== Subscribing to plan ================
+export const planSubcription = async (data: subscribePayload, token: string | null) => {
+  const res = await axios.post(`${apiUrl}/api/v1/payments/initialize`, data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return res.data;
+};
+
+//======== cancel subscription ================
+export const cancelSubcription = async (token: string | null) => {
+  const res = await axios.post(`${apiUrl}/api/v1/subscriptions/cancel`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return res.data;
+};
+
+// ======== Verify KYC ==========
+export const verifyKyc = async (
+  data: VerifyKycType,
+  token: string | null
+) => {
+  const res = await axios.post(
+    `${apiUrl}/api/v1/users/verify/kyc`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return res.data;
 };

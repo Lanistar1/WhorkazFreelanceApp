@@ -3,8 +3,8 @@
 
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import {  createOnlineCourse, createPhysicalCourse, createWorkmanOnboarding, fetchConversationMessages, fetchConversations, fetchCourseById, fetchCourses, fetchJobById, fetchJobs, fetchMyCourses, fetchServices, fetchUser, sendMessage, signIn, signUp } from "./api";
-import {   CourseDetail, CoursesResponse, createUser, Job_Query_Keys, JobFromAPI, JobsResponse, LoginCredentials, LoginResponse, SendMessageRequest, Service, userProfile, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
+import {  cancelSubcription, createOnlineCourse, createPhysicalCourse, createWorkmanOnboarding, fetchBankList, fetchConversationMessages, fetchConversations, fetchCourseById, fetchCourses, fetchJobById, fetchJobs, fetchMyCourses, fetchMyEnrolledCourses, fetchMyubscriptionList, fetchPaymentList, fetchServices, fetchSubscriptionList, fetchUser, initiatePayment, initiateSubscription, planSubcription, sendMessage, signIn, signUp, verifyBank, verifyKyc, verifyPayment } from "./api";
+import {   CourseDetail, CoursesResponse, createUser, EnrolledCoursesResponse, initiatePaymentPayload, Job_Query_Keys, JobFromAPI, JobsResponse, LoginCredentials, LoginResponse, SendMessageRequest, Service, subscribePayload, SubscriptionPaymentPayload, userProfile, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
 import { useAuth } from "../context/AuthContext";
 
 
@@ -256,3 +256,244 @@ export const useMyCourses = (
     staleTime: 1000 * 60 * 5,
   });
 };
+
+// =========Get my enrolled courses ========
+export const useMyEnrolledCourses = (
+  filters: {
+    category?: string;
+    level?: string;
+    classType?: string;
+    workmanId?: string;
+    keyword?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    isActive?: boolean;
+  } = {}
+) => {
+  const { token } = useAuth();
+
+  return useQuery<EnrolledCoursesResponse["data"], Error>({
+    queryKey: ["enrolled-courses", filters],
+    queryFn: () => fetchMyEnrolledCourses(token as string, filters),
+    enabled: !!token,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+
+
+//=====fetching payment list ========
+export const useGetPaymentList = (
+    filters: {
+    status?: string;
+    period?: string;
+    groupBy?: string;
+  } = {}
+) => {
+  const { token } = useAuth();
+
+  return useQuery<any, Error>({
+    queryKey: ["user-profile", filters],
+    queryFn: () => fetchPaymentList(token as string),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+//=====fetching bank list ========
+export const useGetBankList = (
+    filters: {
+    status?: string;
+    period?: string;
+    groupBy?: string;
+  } = {}
+) => {
+  const { token } = useAuth();
+
+  return useQuery<any, Error>({
+    queryKey: ["user-profile", filters],
+    queryFn: () => fetchBankList(token as string),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+
+//======== initiate payment ================
+export const useInitiatePayment= () => {
+  const { token } = useAuth();
+  return useMutation({
+    mutationFn: async ({ data }: { data: initiatePaymentPayload }) =>
+      initiatePayment(data, token),
+    onSuccess: () => {
+      toast.success("Payment Initiated successfully");
+      // Optional: invalidate courses list query to refresh
+      // queryClient.invalidateQueries({ queryKey: ["courses", "list"] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Error initiating payment"
+      );
+    },
+  });
+};
+
+
+//======== verify payment ================
+export const useVerifyPayment= () => {
+  const { token } = useAuth();
+  return useMutation({
+    mutationFn: async ({ data }: { data: verifyPaymentType }) =>
+      verifyPayment(data, token),
+    onSuccess: () => {
+      toast.success("Payment verified successfully");
+      // Optional: invalidate courses list query to refresh
+      // queryClient.invalidateQueries({ queryKey: ["courses", "list"] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Error verifying payment"
+      );
+    },
+  });
+};
+
+
+//======== verify payment ================
+export const useVerifyBank= () => {
+  const { token } = useAuth();
+  return useMutation({
+    mutationFn: async ({ data }: { data: verifyBankFlutterwaveType }) =>
+      verifyBank(data, token),
+    onSuccess: () => {
+      toast.success("Payment verified successfully");
+      // Optional: invalidate courses list query to refresh
+      // queryClient.invalidateQueries({ queryKey: ["courses", "list"] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Error verifying payment"
+      );
+    },
+  });
+};
+
+
+//======== verify payment ================
+export const useInitiateSubscription= () => {
+  const { token } = useAuth();
+  return useMutation({
+    mutationFn: async ({ data }: { data: SubscriptionPaymentPayload }) =>
+      initiateSubscription(data, token),
+    onSuccess: () => {
+      toast.success("Subscription initiated successfully");
+      // Optional: invalidate courses list query to refresh
+      // queryClient.invalidateQueries({ queryKey: ["courses", "list"] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Error initiating subscription"
+      );
+    },
+  });
+};
+
+//=====fetching subscription list ========
+export const useGetSubscriptionList = (
+    filters: {
+    status?: string;
+    period?: string;
+    groupBy?: string;
+  } = {}
+) => {
+  const { token } = useAuth();
+
+  return useQuery<any, Error>({
+    queryKey: ["subscription-plans", filters],
+    queryFn: () => fetchSubscriptionList(token as string),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+
+//=====fetching My subscription list ========
+export const useGetMySubscriptionList = (
+    filters: {
+    status?: string;
+    period?: string;
+    groupBy?: string;
+  } = {}
+) => {
+  const { token } = useAuth();
+
+  return useQuery<any, Error>({
+    queryKey: ["my-subscriptions", filters],
+    queryFn: () => fetchMyubscriptionList(token as string),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+//======== Subscribing to plan ================
+export const useSubscribeToPlan= () => {
+  const { token } = useAuth();
+  return useMutation({
+    mutationFn: async ({ data }: { data: subscribePayload }) =>
+      planSubcription(data, token),
+    onSuccess: () => {
+      toast.success("Subscription successfully");
+      // Optional: invalidate courses list query to refresh
+      // queryClient.invalidateQueries({ queryKey: ["courses", "list"] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Error Subcribong to a plan"
+      );
+    },
+  });
+};
+
+
+//======== Subscribing to plan ================
+export const useCanSubscription= () => {
+  const { token } = useAuth();
+  return useMutation({
+    mutationFn: async ({ data }: { data: verifyBankFlutterwaveType }) =>
+      cancelSubcription( token),
+    onSuccess: () => {
+      toast.success("Subscription cancelled successfully");
+      // Optional: invalidate courses list query to refresh
+      // queryClient.invalidateQueries({ queryKey: ["courses", "list"] });
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Error cancelling plan"
+      );
+    },
+  });
+};
+
+//======== verify KYC ==========
+export const useVerifyKyc = () => {
+  const { token } = useAuth();
+
+  return useMutation({
+    mutationFn: (data: VerifyKycType) =>
+      verifyKyc(data, token),
+
+    onSuccess: () => {
+      toast.success("KYC submitted successfully");
+    },
+
+    onError: (error: any) => {
+      if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(error.message || "KYC verification failed");
+      }
+    },
+  });
+};
+
+
