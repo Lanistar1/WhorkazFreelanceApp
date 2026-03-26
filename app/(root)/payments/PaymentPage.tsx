@@ -407,12 +407,12 @@ const PaymentPage = () => {
             />
           </div>
           <div className="flex items-center space-x-2">
-            <button className="px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors whitespace-nowrap">
+            {/* <button className="px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors whitespace-nowrap">
               Connect wallet
             </button>
             <button className="px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors whitespace-nowrap">
               Payment method
-            </button>
+            </button> */}
             <button className="px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors whitespace-nowrap">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

@@ -9,8 +9,10 @@ import { useUser } from "@/app/actions/reactQuery";
 
 const DashboardPage = () => {
 
-  const { data, isLoading, isError } = useUser();
-  const user = data?.user;
+  const { data: userData, isLoading, isError } = useUser();
+  // const user = data?.user;
+  const user = userData?.data?.user;
+
 
   useEffect(() => {
     if (user?.kycVerificationStatus) {
@@ -20,8 +22,8 @@ const DashboardPage = () => {
     }
   }, [user]); 
   // Default fallback
-  const fullName = user?.client?.clientType === "individual"
-    ? `${user.client.firstName || ""} ${user.client.lastName || ""}`.trim() || "N/A"
+   const fullName = user?.client?.clientType === "individual"
+    ? `${user.firstName || user.client.firstName || ""} ${user.lastName ||user.client.lastName || ""}`.trim() || "User"
     : user?.client?.companyName || "User";
 
   const profilePhoto = user?.client?.photo || "/assets/images/person3.png";
@@ -147,11 +149,11 @@ const DashboardPage = () => {
             <div className="lg:w-100 lg:h-[431px] mt-4 lg:mt-0 bg-white dark:bg-white rounded-[12px] p-6 shadow-sm">
               <div className="flex items-center space-x-3 mb-4">
                 <Image
-                  src="/assets/images/person3.png"
+                  src={user?.profilePic || user?.workman?.photo || "/assets/images/person3.png"}
                   alt="Whorkaz Logo"
                   width={48}
                   height={48}
-                  className="object-contain"
+                  className="rounded-full h-20 w-20 object-cover border-2 border-white shadow-md"
                 />
                 <div>
                   {/* <p className="font-medium">Jason Alexander</p> */}
@@ -185,7 +187,7 @@ const DashboardPage = () => {
                 {/* Post Job - Manual/Placeholder for now */}
                 <li className="flex items-center space-x-2">
                   <div className="h-4 w-4 rounded-full border border-gray-300"></div>
-                  <span>Post your first job</span>
+                  <span>Complete your first job</span>
                 </li>
 
                 {/* KYC Verification - Checking for 'verified' status */}
@@ -198,8 +200,8 @@ const DashboardPage = () => {
 
                 {/* Profile Picture */}
                 <li className="flex items-center space-x-2">
-                  <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${user?.client?.photo ? "bg-[#3900DC] border-[#3900DC]" : "border-gray-300"}`}>
-                    {user?.client?.photo && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                  <div className={`h-4 w-4 rounded-full border flex items-center justify-center ${user?.profilePic ? "bg-[#3900DC] border-[#3900DC]" : "border-gray-300"}`}>
+                    {user?.profilePic  && <div className="w-2 h-2 bg-white rounded-full"></div>}
                   </div>
                   <span>Added profile picture</span>
                 </li>

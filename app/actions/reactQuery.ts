@@ -3,10 +3,14 @@
 
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import {  cancelSubcription, createOnlineCourse, createPhysicalCourse, createWorkmanOnboarding, fetchBankList, fetchConversationMessages, fetchConversations, fetchCourseById, fetchCourses, fetchJobById, fetchJobs, fetchMyCourses, fetchMyEnrolledCourses, fetchMyubscriptionList, fetchPaymentList, fetchServices, fetchSubscriptionList, fetchUser, initiatePayment, initiateSubscription, planSubcription, sendMessage, signIn, signUp, verifyBank, verifyKyc, verifyPayment } from "./api";
-import {   CourseDetail, CoursesResponse, createUser, EnrolledCoursesResponse, initiatePaymentPayload, Job_Query_Keys, JobFromAPI, JobsResponse, LoginCredentials, LoginResponse, SendMessageRequest, Service, subscribePayload, SubscriptionPaymentPayload, userProfile, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
+import {  cancelSubcription, createOnlineCourse, createPhysicalCourse, createWorkmanOnboarding, fetchBankList, fetchCategory, fetchConversationMessages, fetchConversations, fetchCourseById, fetchCourses, fetchJobById, fetchJobs, fetchMyCourses, fetchMyEnrolledCourses, fetchMyubscriptionList, fetchNotificationPreferences, fetchPaymentList, fetchServices, fetchSubscriptionList, fetchUser, initiatePayment, initiateSubscription, planSubcription, resetNotificationPreferences, sendMessage, signIn, signUp, updateNotificationPreferences, updateUserProfile, verifyBank, verifyKyc, verifyPayment } from "./api";
+import {   CourseDetail, CoursesResponse, createUser, EnrolledCoursesResponse, initiatePaymentPayload, Job_Query_Keys, JobFromAPI, JobsResponse, LoginCredentials, LoginResponse, NotificationPreferencesType, SendMessageRequest, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
 import { useAuth } from "../context/AuthContext";
+import axios from "axios";
 
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+console.log(apiUrl);
 
 //======== sign up call=========
 export const useCreateAccount = () => {
@@ -50,12 +54,10 @@ export const useSigninAccount = () => {
 //====== fetch user details ================
 export const useUser = () => {
   const { token } = useAuth();
-
-  return useQuery<userProfile, Error>({
+  return useQuery<UserResponse, Error>({
     queryKey: ["user-profile"],
     queryFn: () => fetchUser(token as string),
     enabled: !!token,
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 };
 
@@ -385,10 +387,16 @@ export const useInitiateSubscription= () => {
   return useMutation({
     mutationFn: async ({ data }: { data: SubscriptionPaymentPayload }) =>
       initiateSubscription(data, token),
-    onSuccess: () => {
-      toast.success("Subscription initiated successfully");
-      // Optional: invalidate courses list query to refresh
-      // queryClient.invalidateQueries({ queryKey: ["courses", "list"] });
+    onSuccess: (res) => {
+      toast.success("Redirecting to payment...");
+
+      const paymentUrl = res?.data?.authorizationUrl;
+
+      if (paymentUrl) {
+        window.location.href = paymentUrl;
+      } else {
+        toast.error("Payment link not received");
+      }
     },
     onError: (error: any) => {
       toast.error(
@@ -497,3 +505,144 @@ export const useVerifyKyc = () => {
 };
 
 
+export const useUpdateUserProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: any) => {
+      // Getting token directly inside the function ensures it's fresh
+      const token = localStorage.getItem("authToken");
+      return updateUserProfile(data, token);
+    },
+
+    onSuccess: () => {
+      // Invalidate the profile query so the UI updates globally
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      toast.success("Profile updated successfully");
+    },
+
+    onError: (error: any) => {
+      if (error?.response?.data?.message) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(error.message || "Failed to update profile");
+      }
+    },
+  });
+};
+
+//=====fetching category ========
+export const useGetCategory = () => {
+  const { token } = useAuth();
+
+  return useQuery<any, Error>({
+    queryKey: ["user-category"],
+    queryFn: () => fetchCategory(token as string),
+    enabled: !!token,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+};
+
+
+// ======== Update Notification call =========
+export const useUpdateNotificationPreferences = () => {
+  const { token } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (preferences: Partial<NotificationPreferencesType>) =>
+      updateNotificationPreferences(preferences, token),
+
+    onSuccess: (data) => {
+      // Optional: invalidate queries that might depend on this data
+      queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
+
+      toast.success('Notification preferences updated successfully');
+    },
+
+    onError: (error: any) => {
+      let errorMessage = 'Failed to update notification preferences';
+
+      if (axios.isAxiosError(error) && error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(`Error: ${errorMessage}`);
+    },
+
+    onMutate: async (newPreferences) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ['notification-preferences'] });
+
+      // Snapshot the previous value
+      const previousPreferences = queryClient.getQueryData<NotificationPreferencesType>([
+        'notification-preferences',
+      ]);
+
+      // Optimistically update
+      queryClient.setQueryData(['notification-preferences'], (old: any) => ({
+        ...old,
+        ...newPreferences,
+      }));
+
+      // Return context with previous value for rollback on error
+      return { previousPreferences };
+    },
+
+    // If the mutation fails, roll back to the previous value
+    onSettled: (data, error, newPreferences, context) => {
+      if (error && context?.previousPreferences) {
+        queryClient.setQueryData(
+          ['notification-preferences'],
+          context.previousPreferences
+        );
+      }
+    },
+  });
+};
+
+// ========Fetch Notification preference =========
+export const useNotificationPreferences = () => {
+  const { token } = useAuth();
+
+  return useQuery<NotificationPreferencesType, Error>({
+    queryKey: ['notification-preferences'],
+    queryFn: () => fetchNotificationPreferences(token as string),
+    enabled: !!token, // only run when we have a token
+    staleTime: 1000 * 60 * 5, // 5 minutes - preferences don't change very often
+    gcTime: 1000 * 60 * 30,   // 30 minutes cache
+    retry: 1,                 // less aggressive retry than default
+  });
+};
+
+
+// =========== reset Notification ===========
+export const useResetNotificationPreferences = () => {
+  const { token } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => resetNotificationPreferences(token),
+
+    onSuccess: () => {
+      // Invalidate the preferences query so it refetches fresh (reset) values
+      queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
+
+      toast.success("Notification preferences reset to default successfully");
+    },
+
+    onError: (error: any) => {
+      let errorMessage = "Failed to reset notification preferences";
+
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast.error(`Error: ${errorMessage}`);
+    },
+  });
+};

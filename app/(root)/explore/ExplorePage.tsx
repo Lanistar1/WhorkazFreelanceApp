@@ -153,8 +153,11 @@ const ExplorePage = () => {
                           <MoreHorizontal className="h-5 w-5 text-gray-500 cursor-pointer" />
                         </div>
                       </div>
-                      <h3 className="text-[18px] font-semibold text-[#32323E] mb-3">{job.milestones[0].workTitle}</h3>
+                      {/* <h3 className="text-[18px] font-semibold text-[#32323E] mb-3">{job.milestones[0].workTitle}</h3> */}
 
+                      <h3 className="text-[18px] font-semibold text-[#32323E] mb-3">
+                        {job.milestones?.[0]?.workTitle || "Untitled Job"}
+                      </h3>
                       {/* User Info */}
                       <div className="flex items-center space-x-3 mb-3">
                         <Image
@@ -168,32 +171,43 @@ const ExplorePage = () => {
                           <div className="text-[16px] font-semibold text-[#4B4B56]">
                             {job.client.email.split("@")[0]}  {/* Use email prefix as name placeholder */}
                           </div>
-                          <div className="text-[14px] text-[#95959F]">
+                          {/* <div className="text-[14px] text-[#95959F]">
                             {job.applications.length} applications • {job.milestones[0].location}
+                          </div> */}
+                          <div className="text-[14px] text-[#95959F]">
+                            {job.applications?.length || 0} applications • {job.milestones?.[0]?.location || "Remote"}
                           </div>
                         </div>
                       </div>
 
                       {/* Tags */}
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {job.milestones[0].skills.slice(0, 3).map((skill, i) => (
+                        {/* {job.milestones[0].skills.slice(0, 3).map((skill, i) => (
                           <span
                             key={i}
                             className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-[12px] font-medium"
                           >
                             {skill}
                           </span>
-                        ))}
-                        {job.milestones[0].skills.length > 3 && (
+                        ))} */}
+                        {job.milestones?.[0]?.skills?.slice(0, 3).map((skill, i) => (
+                          <span key={i} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-[12px] font-medium">
+                            {skill}
+                          </span>
+                        )) || null}
+                        {/* {job.milestones[0].skills.length > 3 && (
                           <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-[12px] font-medium">
                             +{job.milestones[0].skills.length - 3}
                           </span>
-                        )}
+                        )} */}
                       </div>
 
                       {/* Description */}
-                      <p className="text-[14px] text-[#4B4B56] leading-relaxed line-clamp-3">
+                      {/* <p className="text-[14px] text-[#4B4B56] leading-relaxed line-clamp-3">
                         {job.milestones[0].description}
+                      </p> */}
+                      <p className="text-[14px] text-[#4B4B56] leading-relaxed line-clamp-3">
+                        {job.milestones?.[0]?.description || "No description provided."}
                       </p>
                     </div>
                   </div>

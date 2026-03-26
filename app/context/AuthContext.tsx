@@ -82,7 +82,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setToken(null);
     localStorage.removeItem("authToken");
     localStorage.removeItem("authUser");
-    router.push("/sign-in");
+    router.replace("/sign-in");
+
   };
 
   return (
