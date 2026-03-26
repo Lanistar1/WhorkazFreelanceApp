@@ -1,9 +1,11 @@
-
 'use client'
-
 import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/app/context/AuthContext';
+import LogoutModal from './LogoutModal';
+import { useRouter } from "next/navigation";
+
 
 // Using inline SVG for icons to keep the component self-contained.
 const DashboardIcon = () => (
@@ -57,9 +59,29 @@ const SettingsIcon = () => (
     </svg>
 );
 
+const LogoutIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+    <polyline points="10 17 15 12 10 7" />
+    <line x1="15" y1="12" x2="3" y2="12" />
+  </svg>
+);
+
 export const Navbar = () => {
+    const router = useRouter();
     const [activeLink, setActiveLink] = useState('');
+    const { logout } = useAuth();
     const pathname = usePathname();
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     useEffect(() => {
         const currentPath = pathname || '/dashboard';
@@ -83,6 +105,19 @@ export const Navbar = () => {
         { name: 'Settings', icon: <SettingsIcon />, link: '/settings' },
     ];
 
+    const confirmLogout = async () => {
+        try {
+            // OPTIONAL: call API if you have one
+            // await fetch('/api/logout', { method: 'POST' });
+
+            logout(); // from useAuth
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setShowLogoutModal(false);
+        }
+        };
+
     return (
         <>
             {/* Desktop Sidebar (visible on screens larger than 'sm') */}
@@ -97,8 +132,10 @@ export const Navbar = () => {
                     />
                 </div>
 
-                {/* Client Card */}
-                <div className="p-2 rounded-xl flex items-center border border-[#95959F] justify-between shadow-sm">
+                {/* Workmen Card */}
+                <div 
+                    onClick={() => router.replace("/settings")}
+                    className="p-2 rounded-xl flex items-center border border-[#95959F] justify-between shadow-sm cursor-pointer">
                     <div className="flex items-center space-x-2">
                       <Image
                         src="/assets/images/person3.png"
@@ -109,7 +146,7 @@ export const Navbar = () => {
                     />
                         <div>
                             <div className="text-[14px] font-medium text-[#32323E]">FREELANCER WORKSPACE</div>
-                            <div className="text-[16px] font-semibold text-[#95959F]">Jason Alexander</div>
+                            {/* <div className="text-[16px] font-semibold text-[#95959F]">Jason Alexander</div> */}
                         </div>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -175,6 +212,13 @@ export const Navbar = () => {
                         <span>Invite workmen</span>
                     </button>
                 </div>
+                <button
+                    onClick={() => setShowLogoutModal(true)}
+                    className="flex items-center gap-2 text-gray-700 hover:text-red-500 mt-6 p-3 w-full text-left cursor-pointer"
+                    >
+                    <LogoutIcon />
+                    Logout
+                </button>
             </aside>
 
             {/* Mobile Bottom Tab Bar (visible on screens smaller than 'sm') */}
@@ -209,6 +253,11 @@ export const Navbar = () => {
                     ))}
                 </div>
             </nav>
+            <LogoutModal
+                isOpen={showLogoutModal}
+                onClose={() => setShowLogoutModal(false)}
+                onConfirm={confirmLogout}
+            />
         </>
     );
 };

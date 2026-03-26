@@ -1,5 +1,5 @@
 import axios from "axios";
-import {  ConversationMessagesResponse, ConversationsResponse, CourseDetail, CourseDetailResponse, CoursesResponse, CreateOnlineCoursePayload, CreatePhysicalCoursePayload, createUser,  EnrolledCoursesResponse,  initiatePaymentPayload,  JobFromAPI,  JobsResponse,  LoginCredentials, LoginResponse, SendMessageRequest, SendMessageResponse, Service, subscribePayload, SubscriptionPaymentPayload, userProfile, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
+import {  ConversationMessagesResponse, ConversationsResponse, CourseDetail, CourseDetailResponse, CoursesResponse, CreateOnlineCoursePayload, CreatePhysicalCoursePayload, createUser,  EnrolledCoursesResponse,  initiatePaymentPayload,  JobFromAPI,  JobsResponse,  LoginCredentials, LoginResponse, NotificationPreferencesType, SendMessageRequest, SendMessageResponse, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
 
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -19,13 +19,12 @@ export const signIn = async (credentials: LoginCredentials): Promise<LoginRespon
 
 
 //=====fetching user details ========
-export const fetchUser = async (token: string): Promise<userProfile> => {
+export const fetchUser = async (token: string): Promise<UserResponse> => {
   const response = await axios.get(`${apiUrl}/api/v1/users/profile`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data.data; // { user: { ... } }
+  // IMPORTANT: We return the WHOLE body so userData.data.user works in your page
+  return response.data; 
 };
 
 // ========== onboard workers ========
@@ -285,7 +284,7 @@ export const fetchMyEnrolledCourses = async (
 
 
 //=====fetching payment list ========
-export const fetchPaymentList = async (token: string): Promise<userProfile> => {
+export const fetchPaymentList = async (token: string): Promise<any> => {
   const response = await axios.get(`${apiUrl}/api/v1/payments/`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -295,7 +294,7 @@ export const fetchPaymentList = async (token: string): Promise<userProfile> => {
 };
 
 //=====fetching bank list ========
-export const fetchBankList = async (token: string): Promise<userProfile> => {
+export const fetchBankList = async (token: string): Promise<any> => {
   const response = await axios.get(`${apiUrl}/api/v1/payments/banks?`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -350,7 +349,7 @@ export const initiateSubscription = async (data: SubscriptionPaymentPayload, tok
 
 
 //=====fetching subscription list ========
-export const fetchSubscriptionList = async (token: string): Promise<userProfile> => {
+export const fetchSubscriptionList = async (token: string): Promise<any> => {
   const response = await axios.get(`${apiUrl}/api/v1/subscriptions/plans/`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -425,4 +424,98 @@ export const verifyKyc = async (
   );
 
   return res.data;
+};
+
+export const updateUserProfile = async (
+  data: any,
+  token: string | null
+) => {
+  if (!token) throw new Error("Authentication token not found");
+
+  const res = await axios.put(
+    `${apiUrl}/api/v1/users/profile`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+//=====fetching categoty ========
+export const fetchCategory = async (token: string): Promise<any> => {
+  const response = await axios.get(`${apiUrl}/api/v1/admin/lookups/categories`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data.data; 
+};
+
+
+// ======== Update Notification call =========
+export const updateNotificationPreferences = async (
+  preferences: Partial<NotificationPreferencesType>, // Partial allows sending only changed fields
+  token: string | null
+) => {
+  if (!token) {
+    throw new Error('Authentication token is required');
+  }
+
+  const response = await axios.patch(
+    `${apiUrl}/api/v1/notifications/preferences`,
+    preferences,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  return response.data;
+};
+
+
+// ========Fetch Notification preference =========
+export const fetchNotificationPreferences = async (
+  token: string
+): Promise<NotificationPreferencesType> => {
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  const response = await axios.get(
+    `${apiUrl}/api/v1/notifications/preferences`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data as NotificationPreferencesType;
+};
+
+// =========== reset Notification ===========
+export const resetNotificationPreferences = async (token: string | null) => {
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  const response = await axios.post(
+    `${apiUrl}/api/v1/notifications/preferences/reset`,
+    {}, // ← no request body needed
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return response.data;
 };

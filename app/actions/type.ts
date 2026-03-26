@@ -33,15 +33,19 @@ export type createUser = {
 
 //====== user profile type =============
 // types/user.ts
-export interface ClientProfile {
+export interface WorkmanProfile {
   id: string;
-  clientType: "individual" | "business";
-  firstName: string | null;
-  lastName: string | null;
-  phoneNumber: string | null;
-  companyName: string | null;
-  industry: string | null;
-  photo: string | null;
+  skills: string[] | null;
+  yearsOfExperience: number | null;
+  certifications: any[] | null;
+  serviceDescription: string | null;
+  languages: string[] | null;
+  photo: string | null; 
+  rank: string;
+  rating: string;
+  level: number;
+  serviceFee: number | null;
+  location: string | null;
   userId: string;
   createdAt: string;
   updatedAt: string;
@@ -51,28 +55,33 @@ export interface UserProfile {
   id: string;
   email: string;
   phoneNumber: string | null;
-  firstName: string | null; // Top level can be null
-  lastName: string | null;  // Top level can be null
+  firstName: string | null;
+  lastName: string | null;
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
   kycVerificationStatus: "pending" | "verified" | "rejected" | null;
   kycType: string | null;
   profilePic: string | null;
+  address: string | null; // Fixed: Added to type
+  bio: string | null;     // Fixed: Added to type
   userType: "client" | "workman";
   status: string;
-  notificationPreferences: any; // You can keep your specific interface here
+  notificationPreferences: any;
   createdAt: string;
   updatedAt: string;
-  client: ClientProfile | null;
-  workman: any | null;
+  client: any | null;
+  workman: WorkmanProfile | null; // Fixed: Defined WorkmanProfile
   paymentMethods: any[];
   bankAccounts: any[];
 }
 
-export type userProfile = {
-  user: UserProfile;
-};
-
+export interface UserResponse {
+  success: boolean;
+  message: string;
+  data: {
+    user: UserProfile;
+  };
+}
 
 //==========start of workers onboarding requestBody type ============
 export interface OnboardingService {
@@ -625,5 +634,29 @@ export interface EnrolledCoursesResponse {
   data: {
     enrollments: Enrollment[];
     count: number;
+  };
+}
+
+//======= Update Notification Type ==========
+export interface NotificationPreferencesType {
+  jobStatusUpdates: {
+    email: boolean;
+    push: boolean;
+  };
+  newMessages: {
+    email: boolean;
+    push: boolean;
+  };
+  payments: {
+    email: boolean;
+    push: boolean;
+  };
+  announcements: {
+    email: boolean;
+    push: boolean;
+  };
+  accountActivity: {
+    email: boolean;
+    push: boolean;
   };
 }

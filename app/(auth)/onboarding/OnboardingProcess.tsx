@@ -52,6 +52,7 @@ const OnboardingProcess = () => {
   const [pastWorks, setPastWorks] = useState<{ projectTitle: string; projectDescription: string; skillsUsed: string[]; media: string[] }[]>([{ projectTitle: "", projectDescription: "", skillsUsed: [], media: [] }]);
   const [mediaFiles, setMediaFiles] = useState<File[]>([]); // For step 3 media
   const [mediaPreviews, setMediaPreviews] = useState<string[]>([]);
+  const [otherSkill, setOtherSkill] = useState("");
 
   const { mutateAsync: onboardWorkman } = useWorkmanOnboarding();
 
@@ -182,6 +183,15 @@ const OnboardingProcess = () => {
 
   const progress = ((step / 3) * 100).toFixed(0) + "%";
 
+  const currentYear = new Date().getFullYear();
+
+// From 1950 to 30 years in the future
+const years = Array.from(
+  { length: currentYear + 30 - 1950 + 1 },
+  (_, i) => 1950 + i
+).reverse();
+
+
   return (
     <div className="flex mx-5 md:mx-20 max-w-[450px] lg:max-w-full min-h-screen md:p-8 bg-[#FFFDFA]">
       <div className="flex flex-row gap-6 w-full md:p-8 rounded-2xl">
@@ -238,7 +248,7 @@ const OnboardingProcess = () => {
                 What services do you offer?
               </h2>
               <p className="text-[16px] text-[#4B4B56] mb-8">
-                Select the main service(s) you provide (you cant select more than two):
+                Select the main service(s) you provide (you can&apos;t select more than two):
               </p>
 
               <div className="flex flex-col gap-4 md:mr-150">
@@ -294,7 +304,10 @@ const OnboardingProcess = () => {
                 </div>
 
                 <div className="mb-6">
-                  <label className="text-[16px] text-[#4B4B56] mb-2 block">Certification or Courses</label>
+                  <label className="text-[16px] text-[#4B4B56] mb-2 block">
+                    Certification or Courses
+                  </label>
+
                   {certifications.map((cert, index) => (
                     <div key={index} className="flex gap-4 mb-2">
                       <input
@@ -304,22 +317,40 @@ const OnboardingProcess = () => {
                         onChange={(e) => updateCertification(index, "name", e.target.value)}
                         className="flex-1 p-3 text-[#222222] rounded-lg border border-[#E5E5E9] focus:outline-none focus:border-[#3900DC]"
                       />
+
                       <select
                         value={cert.year}
-                        onChange={(e) => updateCertification(index, "year", Number(e.target.value))}
+                        onChange={(e) =>
+                          updateCertification(index, "year", Number(e.target.value))
+                        }
                         className="w-32 p-3 text-[#222222] rounded-lg border border-[#E5E5E9] focus:outline-none focus:border-[#3900DC]"
                       >
                         <option value={0}>Year</option>
-                        <option value={2024}>2024</option>
-                        <option value={2023}>2023</option>
-                        {/* Add more */}
+
+                        {years.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
                       </select>
+
                       {certifications.length > 1 && (
-                        <button onClick={() => removeCertification(index)} className="text-red-500">Remove</button>
+                        <button
+                          onClick={() => removeCertification(index)}
+                          className="text-red-500"
+                        >
+                          Remove
+                        </button>
                       )}
                     </div>
                   ))}
-                  <button onClick={addCertification} className="text-[#3900DC] text-sm hover:underline">+ Add more</button>
+
+                  <button
+                    onClick={addCertification}
+                    className="text-[#3900DC] text-sm hover:underline"
+                  >
+                    + Add more
+                  </button>
                 </div>
 
                 <div className="mb-6">
@@ -406,66 +437,145 @@ const OnboardingProcess = () => {
                 </div>
 
                 <div className="mb-6">
-                  <label className="text-[16px] text-[#4B4B56] mb-2 block">Skills used</label>
-                  <select
-                    value={pastWorks[0]?.skillsUsed[0] || ""}
-                    onChange={(e) =>
+                <label className="text-[16px] text-[#4B4B56] mb-2 block">
+                  Skills used
+                </label>
+
+                {/* Dropdown */}
+                <select
+                  value={pastWorks[0]?.skillsUsed[0] || ""}
+                  disabled={otherSkill.trim() !== ""}
+                  onChange={(e) =>
+                    setPastWorks([
+                      {
+                        ...pastWorks[0],
+                        skillsUsed: e.target.value ? [e.target.value] : [],
+                      },
+                    ])
+                  }
+                  className={`w-full text-[#222222] p-3 rounded-lg border border-[#E5E5E9] focus:outline-none focus:border-[#3900DC] ${
+                    otherSkill.trim() !== "" ? "bg-gray-100 cursor-not-allowed" : "bg-white"
+                  }`}
+                >
+                  <option value="" disabled>
+                    Select a skill
+                  </option>
+                  <option value="Plumbing">Plumbing</option>
+                  <option value="Electrical">Electrical</option>
+                  <option value="Carpentry">Carpentry</option>
+                  <option value="Painting">Painting</option>
+                  <option value="Web Development">Web Development</option>
+                  {/* Add more as needed */}
+                </select>
+
+                {/* Others input */}
+                <div className="mt-4">
+                  <label className="text-[14px] text-[#4B4B56] mb-2 block">
+                    Others (Optional)
+                  </label>
+
+                  <input
+                    type="text"
+                    placeholder="Type your skill if not in the list..."
+                    value={otherSkill}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setOtherSkill(value);
+
                       setPastWorks([
                         {
                           ...pastWorks[0],
-                          skillsUsed: e.target.value ? [e.target.value] : [],
+                          skillsUsed: value.trim() ? [value.trim()] : [],
                         },
-                      ])
-                    }
+                      ]);
+                    }}
                     className="w-full text-[#222222] p-3 rounded-lg border border-[#E5E5E9] focus:outline-none focus:border-[#3900DC]"
-                  >
-                    <option value="" disabled>Select a skill</option>
-                    <option value="Plumbing">Plumbing</option>
-                    <option value="Electrical">Electrical</option>
-                    <option value="Carpentry">Carpentry</option>
-                    <option value="Painting">Painting</option>
-                    <option value="Web Development">Web Development</option>
-                    {/* Add more as needed */}
-                  </select>
+                  />
                 </div>
+              </div>
 
-                <div className="mb-6">
-                  <label className="text-[16px] text-[#4B4B56] mb-2 block">Upload media (Compulsory)</label>
-                  <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-[#E5E5E9] rounded-lg bg-white cursor-pointer hover:bg-[#F9F9FB]">
-                    <input
-                      type="file"
-                      accept="image/*,video/*"
-                      multiple
-                      className="hidden"
-                      id="mediaUpload"
-                      onChange={handleMediaChange}
-                      required
-                    />
-                    <label htmlFor="mediaUpload" className="flex flex-col items-center cursor-pointer">
-                      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#F1F1F5] text-[#3900DC] mb-2">
-                        +
-                      </div>
-                      <p className="text-[14px] text-[#4B4B56]">Browse existing media</p>
-                      <p className="text-[12px] text-[#A1A1A8]">Add image (png, jpg, gif) or video (mp4) to serve as your featured media</p>
-                      <p className="text-[12px] text-[#A1A1A8] mt-1">Recommended: 1500 x 2000 (max 2MB)</p>
-                    </label>
-                  </div>
-                  {mediaPreviews.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {mediaPreviews.map((preview, index) => (
-                        <div key={index} className="relative">
-                          <Image 
-                            src={preview} 
-                            alt="preview" 
-                            fill 
-                            className="w-20 h-20 object-cover rounded-lg" 
-                          />
-                          <button onClick={() => removeMedia(index)} className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">x</button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+               <div className="mb-6">
+  <label className="text-[16px] text-[#4B4B56] mb-2 block">
+    Upload media (Compulsory)
+  </label>
+
+  <div className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-[#E5E5E9] rounded-lg bg-white cursor-pointer hover:bg-[#F9F9FB] overflow-hidden">
+    <input
+      type="file"
+      accept="image/*,video/*"
+      multiple
+      className="hidden"
+      id="mediaUpload"
+      onChange={handleMediaChange}
+      required
+    />
+
+    <label
+      htmlFor="mediaUpload"
+      className="flex flex-col items-center justify-center cursor-pointer w-full h-full"
+    >
+      {mediaPreviews.length > 0 ? (
+        <div className="flex flex-col items-center justify-center">
+          {/* Circular preview */}
+          {mediaFiles[0]?.type.startsWith("video") ? (
+            <video
+              src={mediaPreviews[0]}
+              className="w-24 h-24 rounded-full object-cover border border-[#E5E5E9]"
+              controls
+            />
+          ) : (
+            <img
+              src={mediaPreviews[0]}
+              alt="Preview"
+              className="w-24 h-24 rounded-full object-cover border border-[#E5E5E9]"
+            />
+          )}
+
+          <p className="text-[12px] text-[#4B4B56] mt-2">
+            Click to change media
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#F1F1F5] text-[#3900DC] mb-2">
+            +
+          </div>
+          <p className="text-[14px] text-[#4B4B56]">Browse existing media</p>
+          <p className="text-[12px] text-[#A1A1A8]">
+            Add image (png, jpg, gif) or video (mp4) to serve as your featured
+            media
+          </p>
+          <p className="text-[12px] text-[#A1A1A8] mt-1">
+            Recommended: 1500 x 2000 (max 2MB)
+          </p>
+        </>
+      )}
+    </label>
+  </div>
+
+  {/* Show extra previews below */}
+  {mediaPreviews.length > 1 && (
+    <div className="flex flex-wrap gap-2 mt-4">
+      {mediaPreviews.slice(1).map((preview, index) => (
+        <div key={index} className="relative w-20 h-20">
+          <img
+            src={preview}
+            alt="preview"
+            className="w-20 h-20 object-cover rounded-lg"
+          />
+
+          <button
+            type="button"
+            onClick={() => removeMedia(index + 1)}
+            className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+          >
+            x
+          </button>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
                 <div className="flex flex-row justify-between gap-4 mt-10 ml-auto">
                   {/* <button
