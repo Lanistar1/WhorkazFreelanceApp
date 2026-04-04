@@ -6,13 +6,24 @@ export type LoginCredentials = {
   password: string;
 };
 
+export type Subscription = {
+  status: string;
+  plan: string;
+  endDate: string;
+  autoRenew: boolean;
+};
+
 export type UserFromAPI = {
   email: string;
-  userType: "workman";
+  userType: "client" | "workman";
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
   kycVerificationStatus: string | null;
   status?: string;
+  firstName: string;
+  lastName: string;
+  profilePic: string;
+  subscription?: Subscription;
 };
 
 export type LoginResponse = {
@@ -21,6 +32,7 @@ export type LoginResponse = {
   data: {
     user: UserFromAPI;
     token: string;
+    refreshToken: string;
   };
 };
 
@@ -360,21 +372,27 @@ export interface Message {
 }
 
 // Conversation with one user
-export interface Conversation {
+export interface UserProfile {
   id: string;
-  participant: {
-    id: string;
-    email: string;
-    profilePic: string | null;
-  };
-  lastMessage: {
-    text: string;
-    createdAt: string;
-  };
-  unreadCount: number;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  profilePic: string | null;
+  userType: "client" | "workman";
 }
 
-// All conversations list
+// This matches the "conversations" array in your JSON
+export interface Conversation {
+  id: string;
+  text: string;
+  senderId: string;
+  receiverId: string;
+  createdAt: string;
+  isRead: boolean;
+  sender: UserProfile;
+  receiver: UserProfile;
+}
+
 export interface ConversationsResponse {
   success: boolean;
   message: string;
@@ -659,4 +677,49 @@ export interface NotificationPreferencesType {
     email: boolean;
     push: boolean;
   };
+}
+
+export interface ApplicationJob {
+  id: string;
+  title: string | null;
+  description: string | null;
+  budget: string | null;
+  status: "open" | "in_progress" | "completed" | "closed";
+  createdAt: string;
+  client: {
+    firstName: string;
+    lastName: string;
+    profilePic: string | null;
+  };
+  // The API response you provided has milesstones nested here usually, 
+  // but if it's missing in this specific call, we handle it with optional chaining
+  milestones?: Array<{
+    workTitle: string;
+    maximumBudget: string;
+    startOfProject: string;
+  }>;
+}
+
+export interface JobApplication {
+  id: string;
+  jobId: string;
+  workmanId: string;
+  isHired: boolean;
+  status: string;
+  createdAt: string;
+  job: ApplicationJob;
+}
+
+export interface ApiResponse {
+  success: boolean;
+  data: {
+    applications: JobApplication[];
+  };
+}
+
+
+//========== job query for get job by id =====================
+export enum Application_Query_Keys {
+  Application_ID = "id",
+  My_Application = "My_Application",
 }

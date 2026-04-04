@@ -133,7 +133,7 @@ const transformApiToJobDetail = (apiJob: JobFromAPI): JobDetail => {
 
 const ExploreDetails = ({ id }: { id: string }) => {
   // 1. Get token
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -302,15 +302,44 @@ const ExploreDetails = ({ id }: { id: string }) => {
               </div>
               <p className="text-[14px] text-[#4B4B56]">{job.details.category}</p>
 
-              <div className="flex justify-start items-center cursor-pointer mt-6 ml-0 md:ml-0">
+              {/* <div className="flex justify-start items-center cursor-pointer mt-6 ml-0 md:ml-0">
                 <button
-                    onClick={() => setShowConfirm(true)}
+                  onClick={() => setShowConfirm(true)}
                   disabled={isSubmitting}
                   className="bg-[#3900DC] text-white flex items-center gap-2 px-12 md:px-20 py-3 rounded-full text-sm font-medium disabled:opacity-70"
                 >
                   {isSubmitting ? "Creating..." : "Apply →"}
                 </button>
-              </div>
+              </div> */}
+              {/* Find the button section inside case "Overview" */}
+
+              {/* 1. Check if job status is open 
+                  2. Check if this workman has NOT already applied */}
+              {apiJob?.status === "open" && !apiJob.applications?.some((app: any) => app.workmanId === user?.id) && (
+                <div className="flex justify-start items-center cursor-pointer mt-6 ml-0 md:ml-0">
+                  <button
+                    onClick={() => setShowConfirm(true)}
+                    disabled={isSubmitting}
+                    className="bg-[#3900DC] text-white flex items-center gap-2 px-12 md:px-20 py-3 rounded-full text-sm font-medium disabled:opacity-70"
+                  >
+                    {isSubmitting ? "Creating..." : "Apply →"}
+                  </button>
+                </div>
+              )}
+
+              {/* Optional: Show a "Status" message if they already applied */}
+              {apiJob?.applications?.some((app: any) => app.workmanId === user?.id) && (
+                <div className="mt-6 p-3 bg-blue-50 text-[#3900DC] rounded-lg text-center text-sm font-medium border border-blue-100">
+                  You have already applied for this job
+                </div>
+              )}
+
+              {/* Show nothing if job is completed/inprogress and not applied */}
+              {apiJob?.status !== "open" && (
+                <div className="mt-6 p-3 bg-gray-50 text-[#95959F] rounded-lg text-center text-sm border border-gray-100">
+                  This job is no longer accepting applications (Status: {job.details.status})
+                </div>
+              )}
             </div>
           </div>
         );

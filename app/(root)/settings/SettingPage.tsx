@@ -33,6 +33,7 @@ const SettingPage = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { data: userData, isLoading: isFetchingUser } = useUser();
   const { mutateAsync: updateProfile } = useUpdateUserProfile();
+  const [isVerifying, setIsVerifying] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,6 +55,11 @@ const SettingPage = () => {
     }, [bankDetails.accountNumber, bankDetails.bankCode]);
 
     const verifyBankAccount = async () => {
+      // Start Loader
+      setIsVerifying(true);
+      
+      // Clear previous verification status so user doesn't see old name
+      setBankDetails(prev => ({ ...prev, accountName: "", isVerified: false }));
       try {
         const res = await fetch("https://whorkaz.hordun.tech/api/v1/payments/banks/verify", {
           method: "POST",
@@ -82,6 +88,9 @@ const SettingPage = () => {
         }
       } catch (err) {
         console.error(err);
+      } finally {
+        // Stop Loader
+        setIsVerifying(false);
       }
     };
 
@@ -979,7 +988,7 @@ const [preferences, setPreferences] = useState<NotificationPreferencesType>({
           </div>
 
           {/* Account Number */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <label className="text-[14px] text-[#95959F]">Account Number</label>
             <input
               type="text"
@@ -988,6 +997,20 @@ const [preferences, setPreferences] = useState<NotificationPreferencesType>({
                 setBankDetails({ ...bankDetails, accountNumber: e.target.value })
               }
               className="w-full px-4 py-3 border rounded-lg"
+            />
+          </div> */}
+
+          <div className="space-y-2">
+            <label className="text-[14px] text-[#95959F]">Account Number</label>
+            <input
+              type="text"
+              maxLength={10}
+              value={bankDetails.accountNumber}
+              onChange={(e) =>
+                setBankDetails({ ...bankDetails, accountNumber: e.target.value })
+              }
+              className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#3900DC] outline-none"
+              placeholder="Enter 10-digit account number"
             />
           </div>
 
@@ -999,17 +1022,28 @@ const [preferences, setPreferences] = useState<NotificationPreferencesType>({
             Verify Account
           </button> */}
 
-          {/* Account Name */}
-          {bankDetails.accountName && (
-            <div className="p-3 bg-green-50 rounded-lg text-green-700">
-              {bankDetails.accountName}
-            </div>
-          )}
+          {/* Loader & Account Name Display */}
+          <div className="min-h-[40px]">
+            {isVerifying ? (
+              <div className="flex items-center space-x-2 text-[#3900DC] py-2">
+                <div className="w-4 h-4 border-2 border-[#3900DC] border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-sm font-medium">Verifying account details...</span>
+              </div>
+            ) : bankDetails.accountName ? (
+              <div className="p-3 bg-green-50 rounded-lg text-green-700 border border-green-100 flex items-center justify-between">
+                <span className="font-medium">{bankDetails.accountName}</span>
+                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+            ) : null}
+          </div>
 
-          {/* Save */}
+          {/* Save bank details */}
           <div className="flex justify-end">
             <button
               onClick={async () => {
+                // Keep this check as a secondary safety guard
                 if (!bankDetails.isVerified) {
                   toast.error("Please verify account first");
                   return;
@@ -1029,14 +1063,22 @@ const [preferences, setPreferences] = useState<NotificationPreferencesType>({
                       },
                     ],
                   });
+                  // Clear bank details or show success toast here if needed
                 } catch (err) {
                   console.error(err);
                 } finally {
                   setIsSavingBank(false);
                 }
               }}
-              disabled={isSavingBank}
-              className="px-8 py-3 bg-[#3900DC] text-white rounded-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              // BUTTON IS DISABLED IF: 
+              // 1. It is currently saving OR 
+              // 2. The account has not been verified yet
+              disabled={isSavingBank || !bankDetails.isVerified}
+              className={`px-8 py-3 rounded-full font-medium transition-all ${
+                isSavingBank || !bankDetails.isVerified
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed opacity-70"
+                  : "bg-[#3900DC] text-white cursor-pointer hover:bg-[#2a00b3]"
+              }`}
             >
               {isSavingBank ? "Saving..." : "Save Bank Details"}
             </button>

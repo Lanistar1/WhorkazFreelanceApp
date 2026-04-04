@@ -1,5 +1,5 @@
 import axios from "axios";
-import {  ConversationMessagesResponse, ConversationsResponse, CourseDetail, CourseDetailResponse, CoursesResponse, CreateOnlineCoursePayload, CreatePhysicalCoursePayload, createUser,  EnrolledCoursesResponse,  initiatePaymentPayload,  JobFromAPI,  JobsResponse,  LoginCredentials, LoginResponse, NotificationPreferencesType, SendMessageRequest, SendMessageResponse, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
+import {  ConversationMessagesResponse, ConversationsResponse, CourseDetail, CourseDetailResponse, CoursesResponse, CreateOnlineCoursePayload, CreatePhysicalCoursePayload, createUser,  EnrolledCoursesResponse,  initiatePaymentPayload,  JobApplication,  JobFromAPI,  JobsResponse,  LoginCredentials, LoginResponse, NotificationPreferencesType, SendMessageRequest, SendMessageResponse, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
 
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -93,21 +93,6 @@ export const fetchServices = async (token: string): Promise<Service[]> => {
 
   return response.data.data.services as Service[];
 };
-
-
-//===========fetching job by id ==============
-export const fetchJobById = async (id: string, token: string) => {
-  if (!token) throw new Error("Authentication token missing");
-
-  const response = await axios.get(`${apiUrl}/api/v1/jobs/${id}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data.data.job as JobFromAPI;
-};
-
-
 
 //========= Send message =======
 export const sendMessage = async (data: SendMessageRequest, token: string) => {
@@ -518,4 +503,55 @@ export const resetNotificationPreferences = async (token: string | null) => {
   );
 
   return response.data;
+};
+
+//===========fetching my job list ==============
+export const fetchMyJob = async (token: string): Promise<JobFromAPI[]> => {
+  if (!token) throw new Error("Authentication required");
+
+  const response = await axios.get(`${apiUrl}//api/v1/applications/my-applications`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data.data.jobs as JobFromAPI[];
+};
+
+//===========fetching job by id ==============
+export const fetchJobById = async (id: string, token: string) => {
+  if (!token) throw new Error("Authentication token missing");
+
+  const response = await axios.get(`${apiUrl}/api/v1/jobs/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data.data.job as JobFromAPI;
+};
+
+
+//===========fetching my job list ==============
+export const fetchMyApplication = async (token: string): Promise<JobApplication[]> => {
+  if (!token) throw new Error("Authentication required");
+
+  const response = await axios.get(`${apiUrl}/api/v1/applications/my-applications`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data.data.applications as JobApplication[];
+};
+
+//===========fetching job by id ==============
+export const fetchApplicationById = async (id: string, token: string) => {
+  if (!token) throw new Error("Authentication token missing");
+
+  const response = await axios.get(`${apiUrl}/api/v1/jobs/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data.data.job as JobFromAPI;
 };

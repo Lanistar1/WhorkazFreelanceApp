@@ -3,8 +3,8 @@
 
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import {  cancelSubcription, createOnlineCourse, createPhysicalCourse, createWorkmanOnboarding, fetchBankList, fetchCategory, fetchConversationMessages, fetchConversations, fetchCourseById, fetchCourses, fetchJobById, fetchJobs, fetchMyCourses, fetchMyEnrolledCourses, fetchMyubscriptionList, fetchNotificationPreferences, fetchPaymentList, fetchServices, fetchSubscriptionList, fetchUser, initiatePayment, initiateSubscription, planSubcription, resetNotificationPreferences, sendMessage, signIn, signUp, updateNotificationPreferences, updateUserProfile, verifyBank, verifyKyc, verifyPayment } from "./api";
-import {   CourseDetail, CoursesResponse, createUser, EnrolledCoursesResponse, initiatePaymentPayload, Job_Query_Keys, JobFromAPI, JobsResponse, LoginCredentials, LoginResponse, NotificationPreferencesType, SendMessageRequest, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
+import {  cancelSubcription, createOnlineCourse, createPhysicalCourse, createWorkmanOnboarding, fetchApplicationById, fetchBankList, fetchCategory, fetchConversationMessages, fetchConversations, fetchCourseById, fetchCourses, fetchJobById, fetchJobs, fetchMyApplication, fetchMyCourses, fetchMyEnrolledCourses, fetchMyJob, fetchMyubscriptionList, fetchNotificationPreferences, fetchPaymentList, fetchServices, fetchSubscriptionList, fetchUser, initiatePayment, initiateSubscription, planSubcription, resetNotificationPreferences, sendMessage, signIn, signUp, updateNotificationPreferences, updateUserProfile, verifyBank, verifyKyc, verifyPayment } from "./api";
+import {   Application_Query_Keys, CourseDetail, CoursesResponse, createUser, EnrolledCoursesResponse, initiatePaymentPayload, Job_Query_Keys, JobApplication, JobFromAPI, JobsResponse, LoginCredentials, LoginResponse, NotificationPreferencesType, SendMessageRequest, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 
@@ -104,17 +104,6 @@ export const useServices = () => {
     staleTime: 1000 * 60 * 30, // 30 minutes (services rarely change)
   });
 };
-
-
-//========= Fetch job by Id =========
-export const useJobId = (id: string, token: string) => {
-  return useQuery<JobFromAPI, Error>({ // Added type for useQuery
-    queryKey: [Job_Query_Keys.Job_ID, id],
-    queryFn: () => fetchJobById(id, token),
-    enabled: !!id && !!token, // Ensure it only runs if both are available
-  });
-};
-
 
 
 // Inside app/actions/chat.ts or reactQuery.ts
@@ -644,5 +633,53 @@ export const useResetNotificationPreferences = () => {
 
       toast.error(`Error: ${errorMessage}`);
     },
+  });
+};
+
+//========= Fetch my jobs =========
+export const useMyJob = () => {
+  const { token } = useAuth();
+  console.log(token);
+
+  return useQuery<JobFromAPI[], Error>({
+    queryKey: ["my-jobs"],
+    queryFn: () => fetchMyJob(token as string),
+    placeholderData: keepPreviousData,
+    enabled: !!token,
+    staleTime: 60_000, // 1 minute
+  });
+};
+
+
+//========= Fetch job by Id =========
+export const useJobId = (id: string, token: string) => {
+  return useQuery<JobFromAPI, Error>({ // Added type for useQuery
+    queryKey: [Job_Query_Keys.Job_ID, id],
+    queryFn: () => fetchJobById(id, token),
+    enabled: !!id && !!token, // Ensure it only runs if both are available
+  });
+};
+
+//========= Fetch my jobs =========
+export const useMyApplication = () => {
+  const { token } = useAuth();
+  console.log(token);
+
+  return useQuery<JobApplication[], Error>({
+    queryKey: ["my-jobs"],
+    queryFn: () => fetchMyApplication(token as string),
+    placeholderData: keepPreviousData,
+    enabled: !!token,
+    staleTime: 60_000, // 1 minute
+  });
+};
+
+
+//========= Fetch job by Id =========
+export const useApplicationId = (id: string, token: string) => {
+  return useQuery<JobFromAPI, Error>({ // Added type for useQuery
+    queryKey: [Application_Query_Keys.Application_ID, id],
+    queryFn: () => fetchApplicationById(id, token),
+    enabled: !!id && !!token, // Ensure it only runs if both are available
   });
 };

@@ -10,7 +10,7 @@ interface Job {
   applicants: number;
   clients: string;
   hires: number;
-  budget: number;
+  budget: number | string;
   dueDate: string;
   id: string
 }
@@ -102,15 +102,15 @@ const Table: React.FC<{ jobs: Job[] }> = ({ jobs }) => {
               </td>
               <td className="p-4 w-full sm:w-auto">
                 <span className="sm:hidden font-medium text-[#4B4B56]">Client Name: </span>
-                {job.clients}
+                <span className="text-[#4B4B56] font-semibold">{job.clients}</span>
               </td>
               <td className="p-4 w-full sm:w-auto">
                 <span className="sm:hidden font-medium text-[#4B4B56]">Budget: </span>
-                {job.budget}
+                <span className="text-[#4B4B56] font-semibold">{job.budget}</span>
               </td>
               <td className="p-4 w-full sm:w-auto">
                 <span className="sm:hidden font-medium text-[#4B4B56]">Due date: </span>
-                {job.dueDate}
+                <span className="text-[#4B4B56] font-semibold">{job.dueDate}</span>
               </td>
               <td className="p-4 w-full sm:w-auto">
                 <MoreHorizontal
