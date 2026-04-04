@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useSigninAccount } from "@/app/actions/reactQuery";
 import { useAuth } from "@/app/context/AuthContext";
 import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
 
 const Signin = () => {
   const [email, setEmail] = useState("");
@@ -29,28 +30,54 @@ const Signin = () => {
     }));
   };
 
+  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+
+  //   if (!formData.email || !formData.password) {
+  //     toast.error("Please fill in all fields");
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await loginUser({
+  //       email: formData.email.trim(),
+  //       password: formData.password,
+  //     });
+
+  //     // Success — save user + token
+  //     login(response.data.user, response.data.token);
+  //     // Redirect happens inside AuthContext login()
+  //   } catch (error) {
+  //     // Error already shown via onError in useSigninAccount
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      toast.error("Please fill in all fields");
-      return;
-    }
+  if (!formData.email || !formData.password) {
+    toast.error("Please fill in all fields");
+    return;
+  }
 
-    try {
-      const response = await loginUser({
-        email: formData.email.trim(),
-        password: formData.password,
-      });
+  try {
+    const response = await loginUser({
+      email: formData.email.trim(),
+      password: formData.password,
+    });
 
-      // Success — save user + token
-      login(response.data.user, response.data.token);
-      // Redirect happens inside AuthContext login()
-    } catch (error) {
-      // Error already shown via onError in useSigninAccount
-    }
-  };
+    const decoded: any = jwtDecode(response.data.token);
 
+    const userWithId = {
+      ...response.data.user,
+      id: decoded.userId,
+    };
+
+    login(userWithId, response.data.token);
+  } catch (error) {
+    // handled in react-query already
+  }
+};
 
   return (
     <>

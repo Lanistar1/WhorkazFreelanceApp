@@ -1,89 +1,100 @@
 'use client'
-import React from "react";
-import { MoreHorizontal } from "lucide-react";
+import React, { useMemo } from "react";
 import Header from "@/components/Header";
-import Image from "next/image";
 import Table from "@/components/Table";
+import { useMyApplication } from "@/app/actions/reactQuery"; 
+import { JobApplication } from "@/app/actions/type";
 
-interface Job {
+// This MUST match your Table's Job interface exactly
+interface TableJob {
   posted: string;
   title: string;
-  status: 'In progress' | 'Open' | 'Completed';
+  status: "In progress" | "Open" | "Completed";
   applicants: number;
   clients: string;
-  hires: number;
-  budget: number;
+  hires: number; // Required by your Table component
+  budget: number | string;
   dueDate: string;
-  id: string; // Added id field
+  id: string;
 }
 
-const MyJob = () => {
-  const jobs: Job[] = [
-    {
-      id: "1",
-      posted: 'Posted: May 25, 2025',
-      title: 'Paint 3-bedroom flat interior',
-      status: 'In progress',
-      applicants: 6,
-      hires: 1,
-      clients: "Jide Kosoko",
-      budget: 40000,
-      dueDate: "31/05/2025"
-    },
-    {
-      id: "2",
-      posted: 'Posted: May 25, 2025',
-      title: 'Install 4 Ceiling Fans in My 3-Bedroom Apartment',
-      status: 'Open',
-      applicants: 6,
-      hires: 0,
-      clients: "Jide Kosoko",
-      budget: 40000,
-      dueDate: "31/05/2025"
-    },
-    {
-      id: "3",
-      posted: 'Posted: May 25, 2025',
-      title: 'Paint 3-bedroom flat interior',
-      status: 'Completed',
-      applicants: 6,
-      hires: 2,
-      clients: "Jide Kosoko",
-      budget: 40000,
-      dueDate: "31/05/2025"
-    },
-  ];
+const transformToTableData = (apps: JobApplication[]): TableJob[] => {
+  
+  return apps.map((app) => {
+    
+    const job = app.job;
+    const client = job?.client;
 
+    console.log("CLIENT OBJECT:", client);
+    
+    // 1. Status Mapping
+    let tableStatus: TableJob['status'] = "Open";
+    if (job?.status === "in_progress") tableStatus = "In progress";
+    if (job?.status === "completed") tableStatus = "Completed";
+
+    // 2. Title Logic (Using the fallback you liked)
+    const displayTitle = job?.title || `Project for ${client?.firstName || "Client"}`;
+
+    // 3. Client Name Logic
+    // IMPORTANT: This must be named "clients" to match your Table.tsx: {job.clients}
+    const clientFullName =
+      `${client?.firstName || ""} ${(client as any)?.lastName || (client as any)?.lastname || ""}`
+        .trim() || "Unknown Client";
+    // 4. Budget Logic
+    const budgetValue = job?.budget ? parseFloat(job.budget) : "N/A";
+
+    // 5. Date Logic
+    const rawDate = job?.createdAt || app.createdAt;
+    const formattedDate = rawDate 
+      ? new Date(rawDate).toLocaleDateString('en-GB') 
+      : "N/A";
+
+    return {
+      id: job?.id || app.jobId,
+      posted: new Date(app.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      title: displayTitle,
+      status: tableStatus,
+      applicants: 0, 
+      clients: clientFullName, // Match the 's' in {job.clients}
+      hires: app.isHired ? 1 : 0,
+      budget: budgetValue, 
+      dueDate: formattedDate,
+    };
+  });
+};
+
+const MyJobPage = () => {
+  const { data: applications, isLoading, isError, error } = useMyApplication();
+
+  const jobsForTable = useMemo(() => {
+    return applications ? transformToTableData(applications) : [];
+  }, [applications]);
+
+  if (isLoading) return <div className="p-10 text-center font-medium">Loading jobs...</div>;
+  if (isError) return <div className="p-10 text-center text-red-500">Error: {error.message}</div>;
+
+  console.log("JOBS FOR TABLE:", jobsForTable);
   return (
-    <div className="min-h-screen w-full bg-white dark:bg-white text-gray-900 dark:text-gray-900">
-      {/* Header */}
+    <div className="min-h-screen bg-white">
       <Header title="My Job" />
-
-      {/* Main Content */}
       <main className="px-6 py-4">
-        {/* Filters */}
+        {/* Filters Placeholder */}
         <div className="flex items-center space-x-4 mb-8">
-          <button className="flex items-center justify-between px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-300 rounded-full text-[16px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors">
-            Status
-          </button>
-          <button className="flex items-center justify-between px-4 py-2 bg-white dark:bg-white border border-gray-300 dark:border-gray-300 rounded-full text-[16px] font-medium text-[#4B4B56] dark:text-[#4B4B56] hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors">
-            <Image
-              src="/assets/icons/filterIcon.png"
-              alt="Filter"
-              width={18}
-              height={18}
-              className="object-contain mr-2"
-            />
-            All filters
-          </button>
-          <div className="text-[16px] font-medium text-[#4B4B56] dark:text-[#4B4B56]">Sort: Relevance</div>
+          <button className="px-4 py-2 border rounded-full text-sm font-medium text-[#4B4B56]">Status</button>
+          <div className="text-sm font-medium text-[#4B4B56]">Sort: Relevance</div>
         </div>
 
-        {/* Jobs Table */}
-        <Table jobs={jobs} />
+        {/* Table Component */}
+        {jobsForTable.length > 0 ? (
+          <Table jobs={jobsForTable} />
+        ) : (
+          <div className="text-center py-20 border rounded-xl bg-gray-50 text-gray-500">
+            No applications found.
+          </div>
+        )}
       </main>
     </div>
   );
 };
 
-export default MyJob;
+export default MyJobPage;

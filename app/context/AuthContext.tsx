@@ -9,8 +9,12 @@ import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 
 type User = {
+  id: string;
   email: string;
   userType: "client" | "workman";
+  firstName: string;   // Add this
+  lastName: string;    // Add this
+  profilePic: string;  // Add this
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
   kycVerificationStatus: string | null;
@@ -53,8 +57,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (isExpired) {
           logout();
         } else {
+          const userData = JSON.parse(storedUser);
           setToken(storedToken);
-          setUser(JSON.parse(storedUser));
+          //setUser(JSON.parse(storedUser));
+          setUser({ ...userData, id: decoded.userId });
         }
       } catch (error) {
         logout();

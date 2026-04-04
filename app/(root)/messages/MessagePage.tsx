@@ -395,152 +395,167 @@
 
 
 
-
 'use client';
 
-import React, { useState, useRef, useEffect } from "react";
-import { Send, Search } from "lucide-react";
-import Header from "@/components/Header";
-import Image from "next/image";
-import {
-  useConversations,
-  useConversationMessages,
-  useSendMessage,
-} from "@/app/actions/reactQuery";
-import { useAuth } from "@/app/context/AuthContext";
-import type { Conversation, Message } from "@/app/actions/type";
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Send, Search, MessageCircle, Smile, Phone, Paperclip } from 'lucide-react';
+import Image from 'next/image';
+import { io, Socket } from "socket.io-client";
+import Header from '@/components/Header';
+import { useConversations, useConversationMessages, useSendMessage } from '@/app/actions/reactQuery';
+import { useAuth } from '@/app/context/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface MessagePageProps {
   initialUserId?: string | null;
 }
 
 const MessagePage = ({ initialUserId }: MessagePageProps) => {
-  const { token } = useAuth();
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [newMessage, setNewMessage] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
+  const { token, user } = useAuth();
+  const queryClient = useQueryClient();
+  
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(initialUserId || null);
+  const [newMessage, setNewMessage] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-select the user if coming from direct link
-  useEffect(() => {
-    if (initialUserId && !selectedUserId) {
-      setSelectedUserId(initialUserId);
-    }
-  }, [initialUserId, selectedUserId]);
-
-  // Fetch all conversations
-  const {
-    data: convosData,
-    isLoading: loadingConvos,
-  } = useConversations();
-
-  // Fetch messages for selected user
-  const {
-    data: messagesData,
-    isLoading: loadingMessages,
-  } = useConversationMessages(selectedUserId);
-
+  const { data: convosData, isLoading: loadingConvos } = useConversations();
+  const { data: messagesData, isLoading: loadingMessages } = useConversationMessages(selectedUserId);
   const sendMutation = useSendMessage();
 
-  // Extract data safely
-  const conversations = convosData?.data?.conversations || [];
+  const rawConversations = convosData?.data?.conversations || [];
   const messages = messagesData?.data?.messages || [];
 
-  // Find selected conversation
-  const selectedConvo = conversations.find(
-    (c: Conversation) => c.participant.id === selectedUserId
-  );
+  // 1. Grouping Logic: Filters out the logged-in user from the sidebar
+  const processedConversations = useMemo(() => {
+    const contactMap = new Map();
 
-  // Filter conversations by search
-  const filteredConversations = conversations.filter((c: Conversation) =>
-    c.participant.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    rawConversations.forEach((convo: any) => {
+      // Comparison using toString() to handle potential type mismatches
+      const isMeSender = convo.senderId?.toString() === user?.id?.toString();
+      const participant = isMeSender ? convo.receiver : convo.sender;
+      
+      // FIX: If the participant is the logged in user, skip adding to sidebar
+      if (!participant?.id || participant.id?.toString() === user?.id?.toString()) return;
 
-  // Send message
-  const handleSend = () => {
-    if (!newMessage.trim() || !selectedUserId) return;
-
-    sendMutation.mutate(
-      {
-        receiverId: selectedUserId,
-        text: newMessage,
-        jobId: "",
-      },
-      {
-        onSuccess: () => {
-          setNewMessage("");
-        },
+      const existing = contactMap.get(participant.id);
+      if (!existing || new Date(convo.createdAt) > new Date(existing.createdAt)) {
+        contactMap.set(participant.id, {
+          ...convo,
+          displayParticipant: participant,
+          lastText: convo.text,
+        });
       }
-    );
-  };
+    });
 
-  // Auto-scroll to bottom
+    return Array.from(contactMap.values()).sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }, [rawConversations, user?.id]);
+
+  const activeChatPartner = useMemo(() => {
+    return processedConversations.find(c => c.displayParticipant.id === selectedUserId)?.displayParticipant;
+  }, [processedConversations, selectedUserId]);
+
+  // 2. Socket.io
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!token) return;
+    socketRef.current = io("https://whorkaz.hordun.tech", {
+      auth: { token },
+      transports: ['websocket']
+    });
+
+    socketRef.current.on("new_message", (incomingMsg) => {
+      if (incomingMsg.senderId === selectedUserId || incomingMsg.receiverId === selectedUserId) {
+        queryClient.invalidateQueries({ queryKey: ['messages', selectedUserId] });
+      }
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    });
+
+    return () => { socketRef.current?.disconnect(); };
+  }, [token, selectedUserId, queryClient]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !selectedUserId) return;
+
+    const messageText = newMessage.trim();
+    setNewMessage(''); 
+
+    sendMutation.mutate({
+      receiverId: selectedUserId,
+      text: messageText,
+    }, {
+      onSuccess: () => {
+        socketRef.current?.emit("send_message", {
+          recipientId: selectedUserId,
+          content: messageText,
+        });
+        queryClient.invalidateQueries({ queryKey: ['messages', selectedUserId] });
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      }
+    });
+  };
+
+  const getDisplayName = (userObj: any) => {
+    if (!userObj?.firstName) return userObj?.email?.split('@')[0] || 'User';
+    return `${userObj.firstName} ${userObj.lastName}`;
+  };
+
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="h-screen w-full bg-white flex flex-col overflow-hidden text-gray-900">
       <Header title="Messages" />
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar - Conversations */}
-        <div
-          className={`w-full sm:w-96 border-r border-gray-200 flex flex-col ${
-            selectedUserId ? "hidden sm:flex" : "flex"
-          }`}
-        >
-          <div className="p-4 border-b">
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <div className={`w-full sm:w-[400px] border-r border-[#DBDBE3] flex flex-col bg-white ${selectedUserId ? 'hidden sm:flex' : 'flex'}`}>
+          <div className="p-4 border-b border-[#DBDBE3]">
             <div className="relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search messages"
-                value={searchQuery}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full text-sm outline-none focus:ring-2 focus:ring-[#220084]"
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
             {loadingConvos ? (
-              <p className="p-4 text-center text-gray-500">Loading chats...</p>
-            ) : filteredConversations.length === 0 ? (
-              <p className="p-8 text-center text-gray-500">No conversations yet</p>
+               <div className="p-10 text-center text-gray-400 font-medium">Loading chats...</div>
+            ) : processedConversations.length === 0 ? (
+                <div className="p-10 text-center text-gray-400 font-medium">No messages yet</div>
             ) : (
-              filteredConversations.map((convo: Conversation) => (
+                processedConversations
+                .filter(c => getDisplayName(c.displayParticipant).toLowerCase().includes(searchQuery.toLowerCase()))
+                .map((convo) => (
                 <div
                   key={convo.id}
-                  onClick={() => setSelectedUserId(convo.participant.id)}
-                  className={`p-4 hover:bg-gray-50 cursor-pointer border-b transition-colors ${
-                    selectedUserId === convo.participant.id ? "bg-purple-50" : ""
-                  }`}
+                  onClick={() => setSelectedUserId(convo.displayParticipant.id)}
+                  className={`p-4 border-b border-gray-100 cursor-pointer flex items-center gap-3 hover:bg-gray-50 transition-colors ${selectedUserId === convo.displayParticipant.id ? 'bg-purple-50 border-r-2 border-[#220084]' : ''}`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="relative h-12 w-12 flex-shrink-0">
                     <Image
-                      src={
-                        convo.participant.profilePic ||
-                        "/assets/images/person3.png"
-                      }
-                      alt={convo.participant.email}
-                      width={48}
-                      height={48}
-                      className="rounded-full object-cover"
+                      src={convo.displayParticipant?.profilePic || '/assets/images/person3.png'}
+                      alt="" fill className="rounded-full object-cover"
                     />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">
-                        {convo.participant.email.split("@")[0]}
-                      </p>
-                      <p className="text-sm text-gray-600 truncate">
-                        {convo.lastMessage?.text || "No messages yet"}
-                      </p>
-                    </div>
-                    {convo.unreadCount > 0 && (
-                      <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
-                        {convo.unreadCount}
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <p className="font-semibold truncate text-[#32323E]">{getDisplayName(convo.displayParticipant)}</p>
+                      <span className="text-[11px] text-[#95959F]">
+                        {new Date(convo.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
-                    )}
+                    </div>
+                    <p className="text-sm text-[#4B4B56] truncate mt-0.5 font-medium">{convo.lastText}</p>
                   </div>
                 </div>
               ))
@@ -549,76 +564,58 @@ const MessagePage = ({ initialUserId }: MessagePageProps) => {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col">
+        <div className={`flex-1 flex flex-col bg-gray-50 ${!selectedUserId ? 'hidden sm:flex' : 'flex'}`}>
           {selectedUserId ? (
-            // User is selected — show chat, even if no conversation exists yet
             <>
-              {/* Chat Header - Show user info even for new chats */}
-              <div className="p-4 border-b bg-white flex items-center gap-3">
-                <button
-                  onClick={() => setSelectedUserId(null)}
-                  className="sm:hidden text-gray-600 text-xl"
-                >
-                  ←
-                </button>
-                <Image
-                  src={
-                    // Try to get profile pic from conversations list if available
-                    conversations.find(c => c.participant.id === selectedUserId)?.participant.profilePic ||
-                    "/assets/images/person3.png"
-                  }
-                  alt="User"
-                  width={40}
-                  height={40}
-                  className="rounded-full object-cover"
-                />
-                <div>
-                  <p className="font-semibold">
-                    {
-                      conversations.find(c => c.participant.id === selectedUserId)?.participant.email.split("@")[0] ||
-                      "User"
-                    }
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {selectedConvo ? "Active now" : "Start a conversation"}
-                  </p>
+              {/* Chat Header */}
+              <div className="p-4 border-b border-[#DBDBE3] bg-white flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button onClick={() => setSelectedUserId(null)} className="sm:hidden p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <div className="relative h-11 w-11 flex-shrink-0">
+                    <Image
+                      src={activeChatPartner?.profilePic || '/assets/images/person3.png'}
+                      alt="" fill className="rounded-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <div className="text-[16px] font-semibold text-[#32323E]">{getDisplayName(activeChatPartner)}</div>
+                    <div className="flex items-center gap-1.5 text-[12px] text-green-500 font-medium">
+                      <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                      <span>Online</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                   <button className="px-4 py-2 bg-white border border-gray-200 text-black rounded-full text-[14px] font-medium hidden sm:inline-flex">View work details</button>
+                   <button className="p-2 hover:bg-gray-100 rounded-full transition-colors hidden sm:block">
+                     <Phone className="h-4 w-4 text-gray-500" />
+                   </button>
+                   <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                     <Paperclip className="h-4 w-4 text-gray-500" />
+                   </button>
                 </div>
               </div>
 
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+              {/* Messages Container */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {loadingMessages ? (
-                  <p className="text-center text-gray-500">Loading...</p>
-                ) : messages.length === 0 ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <div className="w-32 h-32 bg-gray-200 rounded-full mx-auto mb-4 opacity-30" />
-                      <p className="text-gray-500 text-lg">No messages yet</p>
-                      <p className="text-sm text-gray-400 mt-2">Send a message to start the conversation</p>
-                    </div>
-                  </div>
+                  <p className="text-center text-gray-400 py-10 font-medium">Loading conversation...</p>
                 ) : (
-                  messages.map((msg: Message) => {
-                    const isOwn = msg.senderId === token?.split("|")[1]; // adjust if needed
+                  messages.map((msg: any) => {
+                    // FIX: Ensure we use strict comparison with string conversion to differentiate sides
+                    const isOwn = msg.senderId?.toString() === user?.id?.toString(); 
                     return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
-                      >
-                        <div
-                          className={`max-w-xs px-4 py-2 rounded-2xl ${
-                            isOwn
-                              ? "bg-purple-600 text-white"
-                              : "bg-white border border-gray-200"
-                          }`}
-                        >
-                          {msg.text}
-                          <p className="text-xs opacity-70 mt-1">
-                            {new Date(msg.createdAt).toLocaleTimeString([], {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </p>
+                      <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}>
+                        <div className={`max-w-[70%] p-3 rounded-2xl shadow-sm ${isOwn ? 'bg-[#220084] text-white rounded-br-sm' : 'bg-white text-gray-800 border border-gray-200 rounded-bl-sm'}`}>
+                          <p className="text-[14px] leading-relaxed font-medium">{msg.text}</p>
+                          <div className={`flex items-center justify-end mt-1 text-[10px] ${isOwn ? 'opacity-70' : 'text-gray-400'}`}>
+                             <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                             {isOwn && <span className="ml-1">✓✓</span>}
+                          </div>
                         </div>
                       </div>
                     );
@@ -627,40 +624,38 @@ const MessagePage = ({ initialUserId }: MessagePageProps) => {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Input Area - Always show when user is selected */}
-              <div className="p-4 border-t bg-white">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSend();
-                  }}
-                  className="flex gap-2"
-                >
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                    className="flex-1 px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  />
-                  <button
-                    type="submit"
-                    disabled={sendMutation.isPending || !newMessage.trim()}
-                    className="bg-purple-600 text-white p-3 rounded-full hover:bg-purple-700 disabled:opacity-50 transition"
+              {/* Input Area */}
+              <div className="p-4 border-t border-[#DBDBE3] bg-white">
+                <form onSubmit={handleSend} className="flex items-center gap-2 max-w-5xl mx-auto">
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type a message..."
+                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-full text-[14px] font-medium text-[#4B4B56] focus:outline-none focus:ring-2 focus:ring-[#220084]"
+                    />
+                    <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors">
+                       <Smile className="h-5 w-5 text-gray-400" />
+                    </button>
+                  </div>
+                  <button 
+                    type="submit" 
+                    disabled={!newMessage.trim() || sendMutation.isPending} 
+                    className={`p-3 rounded-full transition-all shadow-md ${newMessage.trim() ? 'bg-[#220084] text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
                   >
-                    <Send className="h-5 w-5" />
+                    <Send size={20} />
                   </button>
                 </form>
               </div>
             </>
           ) : (
-            // No user selected — show placeholder
-            <div className="flex-1 flex items-center justify-center text-gray-500 bg-gray-50">
-              <div className="text-center">
-                <div className="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4" />
-                <p className="text-lg font-medium">No chat selected</p>
-                <p className="text-sm mt-2">Choose a conversation or start a new one</p>
+            <div className="hidden sm:flex flex-1 flex-col items-center justify-center p-8 text-center bg-white">
+              <div className="w-16 h-16 bg-[#220084] rounded-full flex items-center justify-center mb-4">
+                <MessageCircle className="h-8 w-8 text-white opacity-40" />
               </div>
+              <h3 className="text-[18px] font-semibold text-[#32323E] mb-2">Select a chat</h3>
+              <p className="text-[14px] text-[#95959F]">Choose a contact from the list to start messaging.</p>
             </div>
           )}
         </div>
