@@ -3,8 +3,8 @@
 
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import {  cancelSubcription, createOnlineCourse, createPhysicalCourse, createWorkmanOnboarding, fetchApplicationById, fetchBankList, fetchCategory, fetchConversationMessages, fetchConversations, fetchCourseById, fetchCourses, fetchJobById, fetchJobs, fetchMyApplication, fetchMyCourses, fetchMyEnrolledCourses, fetchMyJob, fetchMyubscriptionList, fetchNotificationPreferences, fetchPaymentList, fetchServices, fetchSubscriptionList, fetchUser, initiatePayment, initiateSubscription, planSubcription, resetNotificationPreferences, sendMessage, signIn, signUp, updateNotificationPreferences, updateUserProfile, verifyBank, verifyKyc, verifyPayment } from "./api";
-import {   Application_Query_Keys, CourseDetail, CoursesResponse, createUser, EnrolledCoursesResponse, initiatePaymentPayload, Job_Query_Keys, JobApplication, JobFromAPI, JobsResponse, LoginCredentials, LoginResponse, NotificationPreferencesType, SendMessageRequest, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
+import {  cancelSubcription, createOnlineCourse, createPhysicalCourse, createWorkmanOnboarding, deleteNotificationById, fetchApplicationById, fetchBankList, fetchCategory, fetchConversationMessages, fetchConversations, fetchCourseById, fetchCourses, fetchJobById, fetchJobs, fetchMyApplication, fetchMyCourses, fetchMyEnrolledCourses, fetchMyJob, fetchMyubscriptionList, fetchNotificationDetail, fetchNotificationPreferences, fetchNotifications, fetchPaymentList, fetchServices, fetchSubscriptionList, fetchUser, initiatePayment, initiateSubscription, markNotificationAsRead, planSubcription, resetNotificationPreferences, sendMessage, signIn, signUp, updateNotificationPreferences, updateUserProfile, verifyBank, verifyKyc, verifyPayment } from "./api";
+import {   Application_Query_Keys, CourseDetail, CoursesResponse, createUser, EnrolledCoursesResponse, initiatePaymentPayload, Job_Query_Keys, JobApplication, JobFromAPI, JobsResponse, LoginCredentials, LoginResponse, NotificationPreferencesType, NotificationType, SendMessageRequest, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 
@@ -681,5 +681,67 @@ export const useApplicationId = (id: string, token: string) => {
     queryKey: [Application_Query_Keys.Application_ID, id],
     queryFn: () => fetchApplicationById(id, token),
     enabled: !!id && !!token, // Ensure it only runs if both are available
+  });
+};
+
+
+// ================= HOOK: GET NOTIFICATIONS =================
+export const useNotifications = () => {
+  const { token } = useAuth();
+
+  return useQuery<NotificationType[], Error>({
+    queryKey: ["notifications"],
+    queryFn: () => fetchNotifications(token as string),
+    enabled: !!token,
+    staleTime: 1000 * 30,
+  });
+};
+
+// ================= HOOK: GET NOTIFICATION DETAIL =================
+export const useNotificationDetail = (id: string | null) => {
+  const { token } = useAuth();
+
+  return useQuery<NotificationType, Error>({
+    queryKey: ["notification-detail", id],
+    queryFn: () => fetchNotificationDetail(id as string, token as string),
+    enabled: !!token && !!id,
+  });
+};
+
+// ================= HOOK: MARK AS READ =================
+export const useMarkNotificationAsRead = () => {
+  const queryClient = useQueryClient();
+  const { token } = useAuth();
+
+  return useMutation({
+    mutationFn: (id: string) => markNotificationAsRead(id, token as string),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["notification-detail"] });
+    },
+
+    onError: (error: any) => {
+      toast.error(error?.message || "Failed to mark notification as read");
+    },
+  });
+};
+
+// ================= HOOK: DELETE NOTIFICATION =================
+export const useDeleteNotification = () => {
+  const queryClient = useQueryClient();
+  const { token } = useAuth();
+
+  return useMutation<void, Error, string>({
+    mutationFn: (id: string) => deleteNotificationById(id, token as string),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      toast.success("Notification deleted.");
+    },
+
+    onError: (error) => {
+      toast.error(`Error deleting notification: ${error.message}`);
+    },
   });
 };

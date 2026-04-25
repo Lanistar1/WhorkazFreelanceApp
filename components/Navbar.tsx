@@ -79,9 +79,12 @@ const LogoutIcon = () => (
 export const Navbar = () => {
     const router = useRouter();
     const [activeLink, setActiveLink] = useState('');
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const pathname = usePathname();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+    const [showMoreMenu, setShowMoreMenu] = useState(false);
+
 
     useEffect(() => {
         const currentPath = pathname || '/dashboard';
@@ -137,17 +140,43 @@ export const Navbar = () => {
                     onClick={() => router.replace("/settings")}
                     className="p-2 rounded-xl flex items-center border border-[#95959F] justify-between shadow-sm cursor-pointer">
                     <div className="flex items-center space-x-2">
-                      <Image
+                         {user?.profilePic ? (
+                    <Image
+                        src={user.profilePic}
+                        alt="User Profile"
+                        width={64}
+                        height={64}
+                        className="w-16 h-16 object-cover rounded-full"
+                    />
+                    ) : (
+                    <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-white font-semibold uppercase">
+                        {user
+                        ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`
+                        : "?"}
+                    </div>
+                    )}
+                      {/* <Image
                         src="/assets/images/person3.png"
                         alt="Whorkaz Logo"
                         width={48}
                         height={48}
                         className="object-contain"
-                    />
-                        <div>
-                            <div className="text-[14px] font-medium text-[#32323E]">FREELANCER WORKSPACE</div>
-                            {/* <div className="text-[16px] font-semibold text-[#95959F]">Jason Alexander</div> */}
-                        </div>
+                    /> */}
+                         <div>
+                    <div className="text-[14px] font-medium text-[#32323E]">
+                        {/* Dynamically show the workspace type based on userType from API */}
+                        {user?.userType?.toUpperCase() || 'FREELANCER'} WORKSPACE
+                    </div>
+                    <div className="text-[16px] font-semibold text-[#95959F]">
+                        {/* Combine First and Last Name */}
+                        {/* {user ? `${user.firstName} ${user.lastName}` : "Loading..."} */}
+                        {!user
+                            ? "Loading..."
+                            : (user.firstName || user.lastName)
+                                ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+                                : ""}
+                    </div>
+                </div>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -222,7 +251,7 @@ export const Navbar = () => {
             </aside>
 
             {/* Mobile Bottom Tab Bar (visible on screens smaller than 'sm') */}
-            <nav className="fixed bottom-0 left-0 w-full bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-1px_rgba(0,0,0,0.06)] sm:hidden z-50">
+            {/* <nav className="fixed bottom-0 left-0 w-full bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-1px_rgba(0,0,0,0.06)] sm:hidden z-50">
                 <div className="flex justify-around items-center h-16">
                     {[
                         { name: 'Dashboard', icon: <DashboardIcon />, link: '/dashboard' },
@@ -252,7 +281,123 @@ export const Navbar = () => {
                         </a>
                     ))}
                 </div>
+            </nav> */}
+
+                        <nav className="fixed bottom-0 left-0 w-full bg-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-1px_rgba(0,0,0,0.06)] sm:hidden z-50">
+            <div className="flex justify-around items-center h-16 px-2">
+                {[
+                { name: "Dashboard", icon: <DashboardIcon />, link: "/dashboard" },
+                { name: "My jobs", icon: <JobsIcon />, link: "/my-job" },
+                { name: "Explore", icon: <DiscoverIcon />, link: "/explore" },
+                { name: "Messages", icon: <MessagesIcon />, link: "/messages" },
+                ].map((item) => (
+                <a
+                    key={item.name}
+                    href={item.link}
+                    onClick={() => setActiveLink(item.name.toLowerCase().replace(" ", ""))}
+                    className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors
+                    ${
+                        activeLink === item.name.toLowerCase().replace(" ", "")
+                        ? "text-purple-700"
+                        : "text-zinc-900"
+                    }`}
+                >
+                    <div
+                    className={`${
+                        activeLink === item.name.toLowerCase().replace(" ", "")
+                        ? "text-purple-700"
+                        : "text-gray-500"
+                    }`}
+                    >
+                    {item.icon}
+                    </div>
+                    <span className="text-[11px] mt-1 font-medium">{item.name}</span>
+                </a>
+                ))}
+
+                {/* More Button */}
+                <button
+                type="button"
+                onClick={() => setShowMoreMenu(true)}
+                className="flex flex-col items-center justify-center p-2 rounded-lg text-gray-500 hover:text-purple-700 transition"
+                >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6h.01M12 12h.01M12 18h.01" />
+                </svg>
+                <span className="text-[11px] mt-1 font-medium">More</span>
+                </button>
+            </div>
             </nav>
+
+            {/* More Menu Modal */}
+            {showMoreMenu && (
+            <div className="fixed inset-0 z-[999] sm:hidden">
+                {/* Overlay */}
+                <div
+                onClick={() => setShowMoreMenu(false)}
+                className="absolute inset-0 bg-black/40"
+                />
+
+                {/* Bottom Sheet */}
+                <div className="absolute bottom-0 left-0 w-full bg-white rounded-t-2xl p-5 shadow-lg">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-bold text-gray-900">More</h3>
+
+                    <button
+                    onClick={() => setShowMoreMenu(false)}
+                    className="text-gray-500 text-sm font-semibold"
+                    >
+                    Close
+                    </button>
+                </div>
+
+                <div className="space-y-2">
+                    {[
+                    { name: "Apprenticeship", icon: <CoursesIcon />, link: "/courses" },
+                    { name: "Payments", icon: <PaymentsIcon />, link: "/payments" },
+                    { name: "Subscription", icon: <PaymentsIcon />, link: "/plans" },
+                    { name: "Settings", icon: <SettingsIcon />, link: "/settings" },
+                    ].map((item) => (
+                    <a
+                        key={item.name}
+                        href={item.link}
+                        onClick={() => {
+                        setActiveLink(item.name.toLowerCase().replace(" ", ""));
+                        setShowMoreMenu(false);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition"
+                    >
+                        <div className="text-gray-600">{item.icon}</div>
+                        <span className="text-sm font-semibold text-gray-800">
+                        {item.name}
+                        </span>
+                    </a>
+                    ))}
+
+                    {/* Logout */}
+                    <button
+                    onClick={() => {
+                        setShowMoreMenu(false);
+                        setShowLogoutModal(true);
+                    }}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 transition"
+                    >
+                    <div className="text-red-600">
+                        <LogoutIcon />
+                    </div>
+                    <span className="text-sm font-semibold text-red-700">Logout</span>
+                    </button>
+                </div>
+                </div>
+            </div>
+            )}
             <LogoutModal
                 isOpen={showLogoutModal}
                 onClose={() => setShowLogoutModal(false)}

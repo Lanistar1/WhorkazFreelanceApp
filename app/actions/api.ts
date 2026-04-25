@@ -1,5 +1,5 @@
 import axios from "axios";
-import {  ConversationMessagesResponse, ConversationsResponse, CourseDetail, CourseDetailResponse, CoursesResponse, CreateOnlineCoursePayload, CreatePhysicalCoursePayload, createUser,  EnrolledCoursesResponse,  initiatePaymentPayload,  JobApplication,  JobFromAPI,  JobsResponse,  LoginCredentials, LoginResponse, NotificationPreferencesType, SendMessageRequest, SendMessageResponse, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
+import {  ConversationMessagesResponse, ConversationsResponse, CourseDetail, CourseDetailResponse, CoursesResponse, CreateOnlineCoursePayload, CreatePhysicalCoursePayload, createUser,  EnrolledCoursesResponse,  initiatePaymentPayload,  JobApplication,  JobFromAPI,  JobsResponse,  LoginCredentials, LoginResponse, NotificationPreferencesType, NotificationType, SendMessageRequest, SendMessageResponse, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
 
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -554,4 +554,67 @@ export const fetchApplicationById = async (id: string, token: string) => {
     },
   });
   return response.data.data.job as JobFromAPI;
+};
+
+
+
+// ================= FETCH ALL NOTIFICATIONS =================
+export const fetchNotifications = async (token: string): Promise<NotificationType[]> => {
+  if (!token) throw new Error("Authentication token missing");
+
+  const res = await axios.get(`${apiUrl}/api/v1/notifications`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data?.data?.notifications || [];
+};
+
+// ================= FETCH NOTIFICATION DETAIL =================
+export const fetchNotificationDetail = async (
+  id: string,
+  token: string
+): Promise<NotificationType> => {
+  if (!token) throw new Error("Authentication token missing");
+
+  const res = await axios.get(`${apiUrl}/api/v1/notifications/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.data?.data || res.data;
+};
+
+// ================= MARK AS READ =================
+export const markNotificationAsRead = async (id: string, token: string) => {
+  if (!token) throw new Error("Authentication token missing");
+
+  const res = await axios.patch(
+    `${apiUrl}/api/v1/notifications/${id}/read`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+};
+
+// ================= DELETE NOTIFICATION =================
+export const deleteNotificationById = async (id: string, token: string): Promise<void> => {
+  if (!token) throw new Error("Authentication token missing");
+
+  const res = await axios.delete(`${apiUrl}/api/v1/notifications/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (res.status !== 200 && res.status !== 204) {
+    throw new Error("Failed to delete notification.");
+  }
 };

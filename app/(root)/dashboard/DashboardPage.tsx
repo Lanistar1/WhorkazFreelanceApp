@@ -22,17 +22,17 @@ const DashboardPage = () => {
     }
   }, [user]); 
   // Default fallback
-   const fullName = user?.client?.clientType === "individual"
+   const fullName = user?.workman
     ? `${user.firstName || user.client.firstName || ""} ${user.lastName ||user.client.lastName || ""}`.trim() || "User"
     : user?.client?.companyName || "User";
 
-  const profilePhoto = user?.client?.photo || "/assets/images/person3.png";
+  const profilePhoto = user?.workman?.photo || "/assets/images/person3.png";
   const phoneVerified = user?.isPhoneVerified;
   const emailVerified = user?.isEmailVerified;
 
   // Profile completion percentage (example logic)
   const completionItems = [
-    user?.client?.photo !== null,
+    user?.workman?.photo !== null,
     phoneVerified,
     emailVerified,
     true, // payments (you can track this later)
@@ -55,7 +55,7 @@ const DashboardPage = () => {
     <div>
       <div className="min-h-screen w-full bg-white dark:bg-white text-gray-900 dark:text-gray-900">
         {/* Header */}
-        <Header title="Welcome, Alex" />
+        <Header title={`Welcome, ${fullName.split(" ")[0]}`} />
 
         {/* Main Content */}
         <main className="px-6 py-4">
@@ -146,10 +146,10 @@ const DashboardPage = () => {
             </div>
 
             {/* Profile Completion */}
-            <div className="lg:w-100 lg:h-[431px] mt-4 lg:mt-0 bg-white dark:bg-white rounded-[12px] p-6 shadow-sm">
+            <div className="lg:w-100 lg:h-[480px] mt-4 lg:mt-0 bg-white dark:bg-white rounded-[12px] p-6 shadow-sm">
               <div className="flex items-center space-x-3 mb-4">
                 <Image
-                  src={user?.profilePic || user?.workman?.photo || "/assets/images/person3.png"}
+                  src={user?.profilePic || user?.workman?.photo || ""}
                   alt="Whorkaz Logo"
                   width={48}
                   height={48}
@@ -158,13 +158,17 @@ const DashboardPage = () => {
                 <div>
                   {/* <p className="font-medium">Jason Alexander</p> */}
                   <p className="font-medium">{fullName}</p>
-                  <p className="text-sm text-gray-500 dark:text-gray-500">Workaz Client</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">Workaz Workman</p>
                 </div>
               </div>
               <p className="font-medium mb-2">Complete your profile</p>
-              <div className="w-full bg-gray-200 dark:bg-gray-200 rounded-full h-2 mb-2 mt-4">
-                <div className="bg-[#3900DC] h-2 rounded-full" style={{ width: "20%" }}></div>
-              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2 mb-2 mt-4">
+              <div
+                className="bg-[#3900DC] h-2 rounded-full transition-all duration-500"
+                style={{ width: `${completionPercent}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">{Math.round(completionPercent)}% complete</p>
                <div className="mt-8">
               <p className="text-[16px] font-semibold text-[#95959F]">Actionable insights</p>
               <ul className="space-y-5 text-sm mt-4">
