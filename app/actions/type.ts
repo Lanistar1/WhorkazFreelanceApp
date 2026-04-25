@@ -723,3 +723,14 @@ export enum Application_Query_Keys {
   Application_ID = "id",
   My_Application = "My_Application",
 }
+
+// ================= TYPES =================
+export type NotificationType = {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  status: "read" | "unread";
+  createdAt: string;
+  updatedAt: string;
+};

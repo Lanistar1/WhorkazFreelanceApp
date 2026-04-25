@@ -91,7 +91,7 @@ const KycVerificationPage = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-white text-gray-900">
         <Header title="KYC Verification" />
-        <div className="max-w-xl p-6 ml-30"> 
+        <div className="max-w-xl p-6 ml-5 md:ml-30"> 
             <form onSubmit={handleSubmit} className="space-y-4">
                 <CustomInputField
                 label="Full Name"

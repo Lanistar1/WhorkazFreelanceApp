@@ -53,31 +53,31 @@ const Signin = () => {
   // };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!formData.email || !formData.password) {
-    toast.error("Please fill in all fields");
-    return;
-  }
+    if (!formData.email || !formData.password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
 
-  try {
-    const response = await loginUser({
-      email: formData.email.trim(),
-      password: formData.password,
-    });
+    try {
+      const response = await loginUser({
+        email: formData.email.trim(),
+        password: formData.password,
+      });
 
-    const decoded: any = jwtDecode(response.data.token);
+      const decoded: any = jwtDecode(response.data.token);
 
-    const userWithId = {
-      ...response.data.user,
-      id: decoded.userId,
-    };
+      const userWithId = {
+        ...response.data.user,
+        id: decoded.userId,
+      };
 
-    login(userWithId, response.data.token);
-  } catch (error) {
-    // handled in react-query already
-  }
-};
+      login(userWithId, response.data.token);
+    } catch (error) {
+      // handled in react-query already
+    }
+  };
 
   return (
     <>

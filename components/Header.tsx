@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Bell, MessageSquare, Wallet } from "lucide-react";
+import Link from "next/link";
 
 interface HeaderProps {
   title: string; // dynamic prop for the heading text
@@ -12,13 +13,12 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
       <h1 className="text-2xl text-[#4B4B56] font-bold">{title}</h1>
 
       <div className="flex items-center space-x-4">
-        <Bell className="h-5 w-5 text-gray-500 dark:text-gray-500" />
-        <MessageSquare className="hidden md:flex h-5 w-5 text-gray-500 dark:text-gray-500" />
-
-        <button className="hidden md:flex items-center space-x-2 px-4 py-2 border border-gray-300 dark:border-gray-300 rounded-full text-[16px] text-[#32323E] font-semibold hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors">
-          <Wallet className="h-4 w-4" />
-          <span className="text-[16px] text-[#4B4B56] font-semibold">Connect wallet</span>
-        </button>
+        <Link href="/notifications">
+            <Bell className="h-5 w-5 text-gray-500 dark:text-gray-500" />
+        </Link>
+        <Link href="/messages">
+          <MessageSquare className="hidden md:flex h-5 w-5 text-gray-500 dark:text-gray-500" />
+        </Link>
       </div>
     </header>
   );
