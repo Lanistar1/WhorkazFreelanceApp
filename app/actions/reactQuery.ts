@@ -274,20 +274,41 @@ export const useMyEnrolledCourses = (
 
 
 //=====fetching payment list ========
+// export const useGetPaymentList = (
+//     filters: {
+//     status?: string;
+//     period?: string;
+//     groupBy?: string;
+//   } = {}
+// ) => {
+//   const { token } = useAuth();
+
+//   return useQuery<any, Error>({
+//     queryKey: ["user-profile", filters],
+//     queryFn: () => fetchPaymentList(token as string),
+//     enabled: !!token,
+//     staleTime: 5 * 60 * 1000, // 5 minutes
+//   });
+// };
+
 export const useGetPaymentList = (
-    filters: {
+  filters: {
     status?: string;
-    period?: string;
+    contextType?: string;
+    reference?: string;
+    payerId?: string;
+    from?: string;
+    to?: string;
     groupBy?: string;
   } = {}
 ) => {
   const { token } = useAuth();
 
   return useQuery<any, Error>({
-    queryKey: ["user-profile", filters],
-    queryFn: () => fetchPaymentList(token as string),
+    queryKey: ["payments", filters],
+    queryFn: () => fetchPaymentList(token as string, filters),
     enabled: !!token,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 };
 

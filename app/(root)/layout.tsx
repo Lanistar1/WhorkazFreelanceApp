@@ -8,7 +8,7 @@ export default function RootLayout({
   return (
     <main className="h-screen w-screen overflow-hidden">
       {/* Sidebar / Navbar */}
-      <div className="hidden lg:fixed lg:top-0 lg:left-0 lg:h-screen lg:w-[305px] lg:z-50 lg:block">
+      <div className="hidden lg:fixed lg:top-0 lg:left-0 lg:h-screen lg:w-[305px] lg:z-50 lg:block md:overflow-y-auto lg:border-r lg:border-gray-200">
         <Navbar />
       </div>
 
@@ -28,31 +28,3 @@ export default function RootLayout({
 }
 
 
-
-
-
-
-
-// import { Navbar } from "@/components/Navbar";
-
-// export default function RootLayout({
-//   children,
-// }: {
-//   children: React.ReactNode;
-// }) {
-//   return (
-//     <main className="h-screen w-screen overflow-hidden">
-//       {/* Fixed Navbar */}
-//       <div className="fixed top-0 left-0 h-full z-50 overflow-auto">
-//         <Navbar />
-//       </div>
-
-//       {/* Content area */}
-//       <div className="ml-[305px] h-full overflow-auto">
-//         <div className="w-full h-full overflow-x-hidden">
-//           {children}
-//         </div>
-//       </div>
-//     </main>
-//   );
-// }

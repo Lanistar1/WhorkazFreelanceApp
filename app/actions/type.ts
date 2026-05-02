@@ -45,6 +45,97 @@ export type createUser = {
 
 //====== user profile type =============
 // types/user.ts
+// export interface WorkmanProfile {
+//   id: string;
+//   skills: string[] | null;
+//   yearsOfExperience: number | null;
+//   certifications: any[] | null;
+//   serviceDescription: string | null;
+//   languages: string[] | null;
+//   photo: string | null; 
+//   rank: string;
+//   rating: string;
+//   level: number;
+//   serviceFee: number | null;
+//   location: string | null;
+//   userId: string;
+//   createdAt: string;
+//   updatedAt: string;
+// }
+
+// export interface UserProfile {
+//   id: string;
+//   email: string;
+//   phoneNumber: string | null;
+//   firstName: string | null;
+//   lastName: string | null;
+//   isEmailVerified: boolean;
+//   isPhoneVerified: boolean;
+//   kycVerificationStatus: "pending" | "verified" | "rejected" | null;
+//   kycType: string | null;
+//   profilePic: string | null;
+//   address: string | null; // Fixed: Added to type
+//   bio: string | null;     // Fixed: Added to type
+//   userType: "client" | "workman";
+//   status: string;
+//   notificationPreferences: any;
+//   createdAt: string;
+//   updatedAt: string;
+//   client: any | null;
+//   workman: WorkmanProfile | null; // Fixed: Defined WorkmanProfile
+//   paymentMethods: any[];
+//   bankAccounts: any[];
+// }
+
+// export interface UserResponse {
+//   success: boolean;
+//   message: string;
+//   data: {
+//     user: UserProfile;
+//   };
+// }
+
+
+
+export type KycStatus = "pending" | "verified" | "rejected" | null;
+
+export type UserType = "client" | "workman" | "admin";
+
+export type UserStatus =
+  | "active"
+  | "inactive"
+  | "suspended"
+  | "banned"
+  | "pending"
+  | string;
+
+export interface NotificationPreferenceItem {
+  push: boolean;
+  email: boolean;
+}
+
+export interface NotificationPreferences {
+  payments: NotificationPreferenceItem;
+  newMessages: NotificationPreferenceItem;
+  announcements: NotificationPreferenceItem;
+  accountActivity: NotificationPreferenceItem;
+  jobStatusUpdates: NotificationPreferenceItem;
+}
+
+export interface ClientProfile {
+  id: string;
+  clientType: "individual" | "company" | string;
+  firstName: string | null;
+  lastName: string | null;
+  phoneNumber: string | null;
+  companyName: string | null;
+  industry: string | null;
+  photo: string | null;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface WorkmanProfile {
   id: string;
   skills: string[] | null;
@@ -52,10 +143,10 @@ export interface WorkmanProfile {
   certifications: any[] | null;
   serviceDescription: string | null;
   languages: string[] | null;
-  photo: string | null; 
-  rank: string;
-  rating: string;
-  level: number;
+  photo: string | null;
+  rank: string | null;
+  rating: string | null;
+  level: number | null;
   serviceFee: number | null;
   location: string | null;
   userId: string;
@@ -63,28 +154,145 @@ export interface WorkmanProfile {
   updatedAt: string;
 }
 
+export interface BankAccount {
+  id: string;
+  userId: string;
+  bankName: string;
+  bankCode: string;
+  accountNumber: string;
+  accountName: string;
+  currency: string;
+  recipientCode: string | null;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaymentMethod {
+  id?: string;
+  provider?: string;
+  type?: string;
+  last4?: string;
+  expiryMonth?: string;
+  expiryYear?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: any;
+}
+
+export interface CryptoPayoutAccount {
+  id?: string;
+  userId?: string;
+  walletAddress?: string;
+  network?: string;
+  currency?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: any;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  code: string;
+  description: string;
+  price: string;
+  currency: string;
+  interval: string; // monthly, yearly, etc
+  duration: number;
+  paystackPlanCode: string | null;
+  flutterwavePlanId: string | null;
+  features: string[];
+  planType: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Subscription1 {
+  id: string;
+  userId: string;
+  planId: string;
+  status: "active" | "expired" | "cancelled" | "pending" | string;
+  startDate: string;
+  endDate: string;
+  nextBillingDate: string | null;
+  autoRenew: boolean;
+  providerSubscriptionCode: string | null;
+  provider: "paystack" | "flutterwave" | string;
+  paymentMethodId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  plan: SubscriptionPlan;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
   phoneNumber: string | null;
+
   firstName: string | null;
   lastName: string | null;
+
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
-  kycVerificationStatus: "pending" | "verified" | "rejected" | null;
+
+  kycVerificationStatus: KycStatus;
   kycType: string | null;
+  kycRejectionReason: string | null;
+  kycIdPicture: string | null;
+
   profilePic: string | null;
-  address: string | null; // Fixed: Added to type
-  bio: string | null;     // Fixed: Added to type
-  userType: "client" | "workman";
-  status: string;
-  notificationPreferences: any;
+  address: string | null;
+  bio: string | null;
+
+  googleId: string | null;
+  appleId: string | null;
+
+  userType: UserType;
+  status: UserStatus;
+
+  payoutOption: "fiat" | "crypto" | string;
+  piUid: string | null;
+
+  skills: string[] | null;
+  dashboardPreferences: any | null;
+
+  notificationPreferences: NotificationPreferences;
+
+  failedLoginAttempts: number;
+  lockedUntil: string | null;
+
   createdAt: string;
   updatedAt: string;
-  client: any | null;
-  workman: WorkmanProfile | null; // Fixed: Defined WorkmanProfile
-  paymentMethods: any[];
-  bankAccounts: any[];
+
+  // nested profile types
+  client: ClientProfile | null;
+  workman: WorkmanProfile | null;
+
+  paymentMethods: PaymentMethod[];
+  bankAccounts: BankAccount[];
+  cryptoPayoutAccounts: CryptoPayoutAccount[];
+
+  subscription: Subscription1 | null;
+}
+
+export interface ProfileStats {
+  phoneNumberVerified: boolean;
+  completeFirstJob: boolean;
+  postedFirstJob: boolean;
+  totalJobAppliedFor: number;
+  totalJobPosted: number;
+  activeJob: number;
+  totalEarning: number;
+}
+
+export interface ReferralSummary {
+  code: string;
+  totalReferrals: number;
+  completedReferrals: number;
+  pendingReferrals: number;
+  totalRewardAmount: number;
 }
 
 export interface UserResponse {
@@ -92,8 +300,12 @@ export interface UserResponse {
   message: string;
   data: {
     user: UserProfile;
+    profileStats: ProfileStats;
+    referralSummary: ReferralSummary;
   };
 }
+
+
 
 //==========start of workers onboarding requestBody type ============
 export interface OnboardingService {
@@ -209,6 +421,8 @@ export interface WorkmanOnboardingResponse {
 //=======get all jobs type =======
 export interface Client {
   id: string;
+  firstName: string,
+  lastName: string,
   email: string;
   password: string;
   phoneNumber: string | null;
@@ -378,7 +592,7 @@ export interface UserProfile {
   firstName: string | null;
   lastName: string | null;
   profilePic: string | null;
-  userType: "client" | "workman";
+  userType: UserType
 }
 
 // This matches the "conversations" array in your JSON

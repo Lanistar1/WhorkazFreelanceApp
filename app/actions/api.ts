@@ -269,13 +269,27 @@ export const fetchMyEnrolledCourses = async (
 
 
 //=====fetching payment list ========
-export const fetchPaymentList = async (token: string): Promise<any> => {
+// export const fetchPaymentList = async (token: string): Promise<any> => {
+//   const response = await axios.get(`${apiUrl}/api/v1/payments/`, {
+//     headers: {
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
+//   return response.data.data; 
+// };
+
+export const fetchPaymentList = async (
+  token: string,
+  filters: Record<string, any> = {}
+) => {
   const response = await axios.get(`${apiUrl}/api/v1/payments/`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
+    params: filters, // 👈 ADD THIS
   });
-  return response.data.data; 
+
+  return response.data.data.payments;
 };
 
 //=====fetching bank list ========

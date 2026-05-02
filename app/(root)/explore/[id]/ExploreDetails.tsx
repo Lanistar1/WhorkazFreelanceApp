@@ -417,6 +417,10 @@ const ExploreDetails = ({ id }: { id: string }) => {
     }
   };
 
+  const handleBack = () => {
+      router.back();
+  };
+
   return (
     <div className="min-h-screen w-full bg-white dark:bg-white text-gray-900 dark:text-gray-900">
       {/* Header */}
@@ -424,7 +428,19 @@ const ExploreDetails = ({ id }: { id: string }) => {
 
       {/* Main Content */}
       <main className="px-6 py-4 mb-16 md:mb-0">
-        <h2 className="text-[#4B4B56] text-[24px] md:text-[32px] font-medium mb-5">{job.title}</h2>
+        <div className="flex items-center -mt-5">
+          <button onClick={handleBack} className="-ml-6 cursor-pointer">
+            <Image
+              src="/assets/icons/back-arrow.png"
+              alt="Back Arrow"
+              width={100}
+              height={10}
+              className="object-contain"
+            />
+          </button>
+          <h2 className="text-[#4B4B56] text-[24px] md:text-[32px] font-medium">{job.title}</h2>
+        </div>
+        
         {/* Overview Tabs */}
         <div className="flex space-x-4 mb-6 overflow-x-auto">
           {overviewTabs.map((tab) => (
