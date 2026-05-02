@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/context/AuthContext';
 import LogoutModal from './LogoutModal';
 import { useRouter } from "next/navigation";
+import Link from 'next/link';
 
 
 // Using inline SVG for icons to keep the component self-contained.
@@ -163,20 +164,20 @@ export const Navbar = () => {
                         className="object-contain"
                     /> */}
                          <div>
-                    <div className="text-[14px] font-medium text-[#32323E]">
-                        {/* Dynamically show the workspace type based on userType from API */}
-                        {user?.userType?.toUpperCase() || 'FREELANCER'} WORKSPACE
+                        <div className="text-[14px] font-medium text-[#32323E]">
+                            {/* Dynamically show the workspace type based on userType from API */}
+                            {user?.userType?.toUpperCase() || 'FREELANCER'} WORKSPACE
+                        </div>
+                        <div className="text-[16px] font-semibold text-[#95959F]">
+                            {/* Combine First and Last Name */}
+                            {/* {user ? `${user.firstName} ${user.lastName}` : "Loading..."} */}
+                            {!user
+                                ? "Loading..."
+                                : (user.firstName || user.lastName)
+                                    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
+                                    : ""}
+                        </div>
                     </div>
-                    <div className="text-[16px] font-semibold text-[#95959F]">
-                        {/* Combine First and Last Name */}
-                        {/* {user ? `${user.firstName} ${user.lastName}` : "Loading..."} */}
-                        {!user
-                            ? "Loading..."
-                            : (user.firstName || user.lastName)
-                                ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
-                                : ""}
-                    </div>
-                </div>
                     </div>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -234,12 +235,15 @@ export const Navbar = () => {
                 <div className="bg-purple-50 border border-[#AA5FBD] p-3 rounded-xl mt-8">
                     <div className="text-[15px] text-[#0B002C] font-semibold mb-1">Invite Your Friends & Earn Rewards</div>
                     <div className="text-[14px] text-[#95959F] font-medium mb-4">Share your referral link and earn credits when your friends hire or work on jobs.</div>
-                    <button className="w-[178px] bg-[#3900DC] hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-full flex items-center justify-center space-x-2 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5l6 6m0 0l-6 6m6-6h-12" />
-                        </svg>
-                        <span>Invite workmen</span>
-                    </button>
+                    <Link href="/referral">
+                        <button className="w-[178px] bg-[#3900DC] cursor-pointer hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-full flex items-center justify-center space-x-2 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5l6 6m0 0l-6 6m6-6h-12" />
+                            </svg>
+                            <span>Invite workmen</span>
+                        </button>
+                    </Link>
+                    
                 </div>
                 <button
                     onClick={() => setShowLogoutModal(true)}

@@ -1085,45 +1085,45 @@ const [preferences, setPreferences] = useState<NotificationPreferencesType>({
           </div>
 
           {bankAccounts.length > 0 && (
-  <div className="mt-8 space-y-4">
-    <h3 className="text-[16px] font-semibold text-[#32323E]">
-      Saved Bank Accounts
-    </h3>
+          <div className="mt-8 space-y-4">
+            <h3 className="text-[16px] font-semibold text-[#32323E]">
+              Saved Bank Accounts
+            </h3>
 
-    {bankAccounts.map((bank: any) => (
-        <div
-          key={bank.id}
-          className="p-4 rounded-xl border border-gray-200 bg-white shadow-sm flex justify-between items-center"
-        >
-          <div>
-            <div className="text-[15px] font-semibold text-[#32323E]">
-              {bank.bankName}
+            {bankAccounts.map((bank: any) => (
+                <div
+                  key={bank.id}
+                  className="p-4 rounded-xl border border-gray-200 bg-white shadow-sm flex justify-between items-center"
+                >
+                  <div>
+                    <div className="text-[15px] font-semibold text-[#32323E]">
+                      {bank.bankName}
+                    </div>
+
+                    <div className="text-[14px] text-[#95959F]">
+                      {/* {bank.accountNumber} */}
+                      {"****" + bank.accountNumber.slice(-4)}
+                    </div>
+
+                    <div className="text-[14px] text-[#4B4B56] font-medium">
+                      {bank.accountName}
+                    </div>
+                  </div>
+
+                  <div className="text-right">
+                    {bank.isDefault && (
+                      <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-
-            <div className="text-[14px] text-[#95959F]">
-              {/* {bank.accountNumber} */}
-              {"****" + bank.accountNumber.slice(-4)}
-            </div>
-
-            <div className="text-[14px] text-[#4B4B56] font-medium">
-              {bank.accountName}
-            </div>
-          </div>
-
-          <div className="text-right">
-            {bank.isDefault && (
-              <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full">
-                Default
-              </span>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  )}
-        </div>
-      );
-    }
+          )}
+                </div>
+              );
+            }
 
     // 5. Default for Access & Activity
     // if (activeTab === 'access') {
