@@ -16,6 +16,14 @@ const DashboardPage = () => {
 
 
   useEffect(() => {
+
+    if (!user) return;
+
+    localStorage.setItem("dashboardUser", JSON.stringify(user));
+
+    // Notify other components that the user changed
+    window.dispatchEvent(new Event("dashboard-user-updated"));
+
     if (user?.kycVerificationStatus) {
       // Save specifically for use on other pages
       localStorage.setItem("userKycStatus", user.kycVerificationStatus);
@@ -79,13 +87,13 @@ const DashboardPage = () => {
                   <button className="bg-white dark:bg-white text-gray-900 dark:text-gray-900 px-4 py-2 rounded-full font-medium border border-gray-300 dark:border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors cursor-pointer">Verify KYC</button>
                 </Link>
               )}
-              {user?.isPhoneVerified === false && (
+              {/* {user?.isPhoneVerified === false && (
                 <Link href="">
                   <button className="bg-white dark:bg-white text-gray-900 dark:text-gray-900 px-4 py-2 rounded-full font-medium border border-gray-300 dark:border-gray-300 hover:bg-gray-100 dark:hover:bg-gray-100 transition-colors cursor-pointer">
                     Verify Phone Number
                   </button>
                 </Link>
-              )}
+              )} */}
             </div>
           </div>
 

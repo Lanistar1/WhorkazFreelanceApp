@@ -9,13 +9,14 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Image from "next/image";
-import { useUpdateNotificationPreferences, useResetNotificationPreferences, useUpdateUserProfile, useUser } from "@/app/actions/reactQuery";
+import { useUpdateNotificationPreferences, useResetNotificationPreferences, useUpdateUserProfile, useUser, useResendPhoneOtp, useVerifyPhone } from "@/app/actions/reactQuery";
 import { NotificationPreferencesType } from "@/app/actions/type";
 import { useRouter } from "next/navigation"; 
 import { uploadSingleFile } from "@/app/actions/api";
 import { NIGERIAN_BANKS } from "@/components/banks";
 import { useAuth } from "@/app/context/AuthContext";
 import { toast } from "react-toastify";
+import VerifyPhoneOtpModal from "@/components/VerifyPhoneOtpModal";
 
 
 interface Field {
@@ -34,8 +35,13 @@ const SettingPage = () => {
   const { data: userData, isLoading: isFetchingUser } = useUser();
   const { mutateAsync: updateProfile } = useUpdateUserProfile();
   const [isVerifying, setIsVerifying] = useState(false);
+  const { mutate: resendOtp, isPending: isResendingOtp } = useResendPhoneOtp();
+
+  const { mutate: verifyPhone, isPending: isVerifyingPhone } = useVerifyPhone();
+
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showOtpModal, setShowOtpModal] = useState(false);
 
     const [bankDetails, setBankDetails] = useState({
       bankName: "",
@@ -112,6 +118,8 @@ const SettingPage = () => {
     }
   };
 
+  const originalPhone = userData?.data?.user?.phoneNumber ?? "";
+
   const handleSaveChanges = async () => {
     setIsProcessing(true);
     try {
@@ -138,6 +146,11 @@ const SettingPage = () => {
       };
 
       await updateProfile(payload);
+      const phoneChanged = originalPhone !== profileData.phoneNumber;
+
+      if (phoneChanged) {
+          setShowOtpModal(true);
+      }
       setSelectedFile(null);
       setImagePreview(null);
     } catch (err) {
@@ -1161,6 +1174,25 @@ const [preferences, setPreferences] = useState<NotificationPreferencesType>({
         {/* Main content */}
         {renderContent()}
       </div>
+       <VerifyPhoneOtpModal
+        open={showOtpModal}
+        phoneNumber={profileData.phoneNumber}
+        loading={isVerifyingPhone}
+        onClose={() => setShowOtpModal(false)}
+        onSubmit={(otp) => {
+            verifyPhone(
+                { otp },
+                {
+                    onSuccess: () => {
+                        setShowOtpModal(false);
+                    },
+                }
+            );
+        }}
+        onResend={() => {
+            resendOtp();
+        }}
+      />
     </div>
   );
 };

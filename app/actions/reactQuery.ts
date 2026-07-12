@@ -3,8 +3,8 @@
 
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import {  cancelSubcription, createOnlineCourse, createPhysicalCourse, createWorkmanOnboarding, deleteNotificationById, fetchApplicationById, fetchBankList, fetchCategory, fetchConversationMessages, fetchConversations, fetchCourseById, fetchCourses, fetchJobById, fetchJobs, fetchMyApplication, fetchMyCourses, fetchMyEnrolledCourses, fetchMyJob, fetchMyubscriptionList, fetchNotificationDetail, fetchNotificationPreferences, fetchNotifications, fetchPaymentList, fetchServices, fetchSubscriptionList, fetchUser, initiatePayment, initiateSubscription, markNotificationAsRead, planSubcription, resetNotificationPreferences, sendMessage, signIn, signUp, updateNotificationPreferences, updateUserProfile, verifyBank, verifyKyc, verifyPayment } from "./api";
-import {   Application_Query_Keys, CourseDetail, CoursesResponse, createUser, EnrolledCoursesResponse, initiatePaymentPayload, Job_Query_Keys, JobApplication, JobFromAPI, JobsResponse, LoginCredentials, LoginResponse, NotificationPreferencesType, NotificationType, SendMessageRequest, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
+import {  cancelSubcription, createOnlineCourse, createPhysicalCourse, createWorkmanOnboarding, deleteNotificationById, fetchApplicationById, fetchBankList, fetchCategory, fetchConversationMessages, fetchConversations, fetchCourseById, fetchCourses, fetchJobById, fetchJobs, fetchMyApplication, fetchMyCourses, fetchMyEnrolledCourses, fetchMyJob, fetchMyubscriptionList, fetchNotificationDetail, fetchNotificationPreferences, fetchNotifications, fetchPaymentList, fetchServices, fetchSubscriptionList, fetchUser, initiatePayment, initiateSubscription, markNotificationAsRead, planSubcription, resendPhoneOtp, resetNotificationPreferences, sendMessage, signIn, signUp, updateNotificationPreferences, updateUserProfile, verifyBank, verifyKyc, verifyPayment, verifyPhone } from "./api";
+import {   Application_Query_Keys, CourseDetail, CoursesResponse, createUser, EnrolledCoursesResponse, initiatePaymentPayload, Job_Query_Keys, JobApplication, JobFromAPI, JobsResponse, LoginCredentials, LoginResponse, NotificationPreferencesType, NotificationType, SendMessageRequest, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, VerifyPhoneOtpType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
 import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 
@@ -763,6 +763,56 @@ export const useDeleteNotification = () => {
 
     onError: (error) => {
       toast.error(`Error deleting notification: ${error.message}`);
+    },
+  });
+};
+
+export const useVerifyPhone = () => {
+  const { token } = useAuth();
+
+  return useMutation({
+    mutationFn: async (data: VerifyPhoneOtpType) =>
+      verifyPhone(data, token),
+
+    onSuccess: () => {
+      toast.success("Phone number verified successfully.");
+    },
+
+    onError: (error: any) => {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(error.message);
+      }
+    },
+  });
+};
+
+export const useResendPhoneOtp = () => {
+  const { token } = useAuth();
+
+  return useMutation({
+    mutationFn: async () =>
+      resendPhoneOtp(token),
+
+    onSuccess: () => {
+      toast.success("OTP sent successfully.");
+    },
+
+    onError: (error: any) => {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(error.message);
+      }
     },
   });
 };
