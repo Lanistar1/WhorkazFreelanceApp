@@ -80,7 +80,28 @@ const LogoutIcon = () => (
 export const Navbar = () => {
     const router = useRouter();
     const [activeLink, setActiveLink] = useState('');
-    const { logout, user } = useAuth();
+    const { logout, user: authUser } = useAuth();
+    const [user, setUser] = useState(authUser);
+    useEffect(() => {
+        const loadUser = () => {
+            const stored = localStorage.getItem("dashboardUser");
+
+            if (stored) {
+            setUser(JSON.parse(stored));
+            } else {
+            setUser(authUser);
+            }
+        };
+
+        loadUser();
+
+        window.addEventListener("dashboard-user-updated", loadUser);
+
+        return () => {
+            window.removeEventListener("dashboard-user-updated", loadUser);
+        };
+    }, [authUser]);
+
     const pathname = usePathname();
     const [showLogoutModal, setShowLogoutModal] = useState(false);
 
@@ -153,7 +174,7 @@ export const Navbar = () => {
                     <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-white font-semibold uppercase">
                         {user
                         ? `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`
-                        : "?"}
+                        : ""}
                     </div>
                     )}
                       {/* <Image

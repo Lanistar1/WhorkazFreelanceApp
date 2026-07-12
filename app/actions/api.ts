@@ -1,5 +1,5 @@
 import axios from "axios";
-import {  ConversationMessagesResponse, ConversationsResponse, CourseDetail, CourseDetailResponse, CoursesResponse, CreateOnlineCoursePayload, CreatePhysicalCoursePayload, createUser,  EnrolledCoursesResponse,  initiatePaymentPayload,  JobApplication,  JobFromAPI,  JobsResponse,  LoginCredentials, LoginResponse, NotificationPreferencesType, NotificationType, SendMessageRequest, SendMessageResponse, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
+import {  ConversationMessagesResponse, ConversationsResponse, CourseDetail, CourseDetailResponse, CoursesResponse, CreateOnlineCoursePayload, CreatePhysicalCoursePayload, createUser,  EnrolledCoursesResponse,  initiatePaymentPayload,  JobApplication,  JobFromAPI,  JobsResponse,  LoginCredentials, LoginResponse, NotificationPreferencesType, NotificationType, SendMessageRequest, SendMessageResponse, Service, subscribePayload, SubscriptionPaymentPayload, UserResponse, verifyBankFlutterwaveType, VerifyKycType, verifyPaymentType, VerifyPhoneOtpType, WorkmanOnboardingPayload, WorkmanOnboardingResponse, } from "./type";
 
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -631,4 +631,42 @@ export const deleteNotificationById = async (id: string, token: string): Promise
   if (res.status !== 200 && res.status !== 204) {
     throw new Error("Failed to delete notification.");
   }
+};
+
+
+// ================= Verify Phone =================
+export const verifyPhone = async (
+  data: VerifyPhoneOtpType,
+  token: string | null
+) => {
+  const res = await axios.post(
+    `${apiUrl}/api/v1/users/verify/phone`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return res.data;
+};
+
+// ================= Resend Phone OTP =================
+export const resendPhoneOtp = async (
+  token: string | null
+) => {
+  const res = await axios.post(
+    `${apiUrl}/api/v1/users/verify/phone/resend`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  return res.data;
 };

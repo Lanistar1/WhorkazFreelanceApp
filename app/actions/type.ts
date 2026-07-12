@@ -948,3 +948,7 @@ export type NotificationType = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type VerifyPhoneOtpType = {
+  otp: string;
+};
